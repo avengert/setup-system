@@ -1,4 +1,5 @@
-$inputXAML = Get-Content "C:\users\$env:/Userprofile\Desktop\main.xaml"
+$currentUser = "User"
+$inputXAML = Get-Content "C:\users\$currentUser\Desktop\main.xaml"
 $inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
 [xml]$XAML = $inputXAML
@@ -8,8 +9,10 @@ catch {
   Write-Host $_.Exception
 }
 $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
+
 $btnClose.Add_Click({
   Write-Host "Hello World"
 })
+
 $Form.ShowDialog()
 $Form.Dispose()
