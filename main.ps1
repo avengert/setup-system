@@ -7,7 +7,7 @@ try { $Form = [Windows.Markup.XamlReader]::Load($reader) }
 catch {
   Write-Host $_.Exception
 }
-$XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name "$($_.Name_" -Value $Form.FindName($_.Name)}
+$XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
 $btnClose.Add_Click({
   Write-Host "Hello World"
 })
