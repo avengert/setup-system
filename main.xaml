@@ -5,9 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="IFB System-Setup" Height="450" Width="800">
     <Grid>
-        <Button x:Name="btnClose" Content="Close" Margin="750,404,10,10"/>
+        <Button x:Name="btnClose" Content="Close" Margin="0,0,10,10" HorizontalAlignment="Right" Width="40" Height="20" VerticalAlignment="Bottom"/>
+        <Button x:Name="btnAdvancedProperties" Content="Open Advanced Properties" HorizontalAlignment="Left" Margin="35,37,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
+
