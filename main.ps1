@@ -12,7 +12,12 @@ catch {
 $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
 
 $btnClose.Add_Click({
-  Write-Host "Hello World"
+  $Form.Close()
+})
+
+$btnSetDomain.Add_Click({
+  $i = $txtSetDomain.Text
+  Write-Host "You have requested to set your domain as ${i}"
 })
 
 $Form.ShowDialog()
