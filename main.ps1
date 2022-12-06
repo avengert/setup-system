@@ -1,4 +1,4 @@
-$currentUser = $env:\Username
+$currentUser = ${env:Username}
 #$inputXAML = Get-Content "C:\users\$currentUser\Desktop\main.xaml"
 $inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml") #uncomment for Production
 $inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
