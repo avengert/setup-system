@@ -5,11 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="IFB System-Setup" Height="450" Width="800">
-    <Grid>
-        <Button x:Name="btnClose" Content="Close" Margin="0,0,10,10" HorizontalAlignment="Right" Width="40" Height="20" VerticalAlignment="Bottom"/>
-        <Button x:Name="btnAdvancedProperties" Content="Open Advanced Properties" HorizontalAlignment="Left" Margin="35,37,0,0" VerticalAlignment="Top"/>
+        Title="System-Setup" Height="260" Width="532">
+    <Grid Margin="0,0,19,19">
+        <Button x:Name="btnClose" Content="Close" Margin="454,191,0,0" Height="26" VerticalAlignment="Top" HorizontalAlignment="Left" Width="49"/>
+        <Label Content="System Setup" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="81"/>
+        <TextBlock HorizontalAlignment="Left" Height="98" Margin="237,15,0,0" TextWrapping="Wrap" Text="This system is in place to create an easy way to setup and change settings in windows. " VerticalAlignment="Top" Width="266"/>
+        <Button x:Name="btnAdministration" Content="Administration &amp; Settings" HorizontalAlignment="Left" Margin="31,57,0,0" VerticalAlignment="Top" Width="193"/>
+        <Label Content="Opens a new window to set configuration" HorizontalAlignment="Left" Margin="229,54,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnEnableRDP" Content="Enable RDP" HorizontalAlignment="Left" Margin="31,96,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnActivateWindows" Content="Activate Windows" HorizontalAlignment="Left" Margin="101,96,0,0" VerticalAlignment="Top" Width="123"/>
+        <Button x:Name="btnActivateOffice" Content="Activate Office" HorizontalAlignment="Left" Margin="31,121,0,0" VerticalAlignment="Top" Width="193"/>
+        <Button x:Name="btnSetIP" Content="Set IP" HorizontalAlignment="Left" Margin="31,146,0,0" VerticalAlignment="Top" Width="107"/>
+        <Button x:Name="btnSetDNS" Content="Set DNS" HorizontalAlignment="Left" Margin="143,146,0,0" VerticalAlignment="Top" Width="81"/>
+        <TextBox x:Name="txtPCName" HorizontalAlignment="Left" Margin="31,171,0,0" TextWrapping="Wrap" Text="Set PC Name" VerticalAlignment="Top" Width="153" AutomationProperties.HelpText="Set PC Name"/>
+        <Button x:Name="btnSetPCName" Content="Set" HorizontalAlignment="Left" Margin="189,171,0,0" VerticalAlignment="Top" Width="35"/>
+        <Button x:Name="btnRemoveIE" Content="Remove IE" HorizontalAlignment="Left" Margin="31,194,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
+
 
