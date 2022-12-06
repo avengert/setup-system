@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="System-Setup" Height="260" Width="532">
-    <Grid Margin="0,0,19,19">
-        <Button x:Name="btnClose" Content="Close" Margin="454,191,0,0" Height="26" VerticalAlignment="Top" HorizontalAlignment="Left" Width="49"/>
+        Title="System-Setup" Height="333" Width="613">
+    <Grid Margin="0,0,0,-6">
+        <Button x:Name="btnClose" Content="Close" Margin="549,281,10,21"/>
         <Label Content="System Setup" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="81"/>
         <TextBlock HorizontalAlignment="Left" Height="98" Margin="237,15,0,0" TextWrapping="Wrap" Text="This system is in place to create an easy way to setup and change settings in windows. " VerticalAlignment="Top" Width="266"/>
         <Button x:Name="btnAdministration" Content="Administration &amp; Settings" HorizontalAlignment="Left" Margin="31,57,0,0" VerticalAlignment="Top" Width="193"/>
@@ -19,9 +19,12 @@
         <Button x:Name="btnSetDNS" Content="Set DNS" HorizontalAlignment="Left" Margin="143,146,0,0" VerticalAlignment="Top" Width="81"/>
         <TextBox x:Name="txtPCName" HorizontalAlignment="Left" Margin="31,171,0,0" TextWrapping="Wrap" Text="Set PC Name" VerticalAlignment="Top" Width="153" AutomationProperties.HelpText="Set PC Name"/>
         <Button x:Name="btnSetPCName" Content="Set" HorizontalAlignment="Left" Margin="189,171,0,0" VerticalAlignment="Top" Width="35"/>
-        <Button x:Name="btnRemoveIE" Content="Remove IE" HorizontalAlignment="Left" Margin="31,194,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnRemoveIE" Content="Remove IE" HorizontalAlignment="Left" Margin="31,0,0,86" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="txtSetDomain" HorizontalAlignment="Left" Margin="31,194,0,0" TextWrapping="Wrap" Text="Set Domain" VerticalAlignment="Top" Width="153"/>
+        <Button x:Name="btnSetDomain" Content="Set" HorizontalAlignment="Left" Margin="189,196,0,0" VerticalAlignment="Top" Width="35"/>
 
     </Grid>
 </Window>
+
 
 
