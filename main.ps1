@@ -37,5 +37,23 @@ $btnExecutePowershell.Add_Click({
   start-process ${i}
 })
 
+$btnSetComputersToMonitor.Add_Click({
+    # Put this section on a loop checking every 5 minutes possibly in a seperate thread so it doesn't lock up the app.
+    # Then let it loop through a list comma seperated showing the status of each machine.
+    if($txtComputersToMonitor.Text -eq ""){
+        $lblMachine1Status.Content = "Status: "   
+        $lblMachine2Status.Content = "Status: "
+    } else{
+        #This needs to be in a loop
+        if(Test-Connection -BufferSize 32 -Count 1 -ComputerName $txtComputersToMonitor.Text -Quiet){
+           $lblMachine1Status.Foreground = "Green"
+         $lblMachine1Status.Content = "Status: Up"   
+        } else {
+            $lblMachine1Status.Foreground = "Red"
+            $lblMachine1Status.Content = "Status: Down"
+        }
+    }
+})
+
 $Form.ShowDialog()
 $Form.Dispose()
