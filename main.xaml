@@ -41,12 +41,8 @@
             <TabItem Header="Scripts">
                 <Grid Background="#FFE5E5E5">
                     <Label Content="This panel is for scripts. I will have a list of each type of script And a button to execute it below." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-                    <GroupBox Header="Powershell" Height="260" VerticalAlignment="Bottom" Margin="10,0,377,61">
-                        <ListBox x:Name="lstPowershellScripts" d:ItemsSource="{d:SampleData ItemCount=5}"/>
-                    </GroupBox>
-                    <GroupBox Header="Batch Scripts" Height="260" VerticalAlignment="Bottom" Margin="382,0,5,61">
-                        <ListBox x:Name="lstBatchScripts" d:ItemsSource="{d:SampleData ItemCount=5}"/>
-                    </GroupBox>
+                    <GroupBox Header="Powershell" Height="260" VerticalAlignment="Bottom" Margin="10,0,377,61"/>
+                    <GroupBox Header="Batch Scripts" Height="260" VerticalAlignment="Bottom" Margin="382,0,5,61"/>
                     <Button x:Name="btnExecutePowershell" Content="Execute Powershell Script" HorizontalAlignment="Left" Margin="10,306,0,0" VerticalAlignment="Top"/>
                     <Button x:Name="btnExecuteBatch" Content="Execute Batch Script" HorizontalAlignment="Left" Margin="382,306,0,0" VerticalAlignment="Top"/>
                 </Grid>
@@ -54,4 +50,3 @@
         </TabControl>
     </Grid>
 </Window>
-
