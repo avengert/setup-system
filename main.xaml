@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="System-Setup" Height="400" Width="760">
+        Title="System-Setup" Height="430" Width="775">
     <Grid Margin="0,0,0,-6">
         <TabControl>
             <TabItem Header="Main">
                 <Grid Background="#FFE5E5E5">
-                    <Button x:Name="btnClose" Content="Close" Margin="513,270,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="54"/>
+                    <Button x:Name="btnClose" Content="Close" Margin="213,303,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="54"/>
                     <Label Content="System Setup" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="81"/>
                     <TextBlock HorizontalAlignment="Left" Height="98" Margin="237,15,0,0" TextWrapping="Wrap" Text="This system is in place to create an easy way to setup and change settings in windows. " VerticalAlignment="Top" Width="266"/>
                     <Button x:Name="btnEnableRDP" Content="Enable RDP" HorizontalAlignment="Left" Margin="31,96,0,0" VerticalAlignment="Top"/>
@@ -40,11 +40,18 @@
             </TabItem>
             <TabItem Header="Scripts">
                 <Grid Background="#FFE5E5E5">
-                    <Label Content="This panel is for scripts. I will have a list of each type of script And a button to execute it below." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-                    <GroupBox Header="Powershell" Height="260" VerticalAlignment="Bottom" Margin="10,0,377,61"/>
-                    <GroupBox Header="Batch Scripts" Height="260" VerticalAlignment="Bottom" Margin="382,0,5,61"/>
-                    <Button x:Name="btnExecutePowershell" Content="Execute Powershell Script" HorizontalAlignment="Left" Margin="10,306,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnExecuteBatch" Content="Execute Batch Script" HorizontalAlignment="Left" Margin="382,306,0,0" VerticalAlignment="Top"/>
+                    <Label Content="This panel is for scripts. To execute a script simply select it in the list, and click execute below." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                    <GroupBox Header="Powershell" Height="260" VerticalAlignment="Top" Margin="10,71,0,0" HorizontalAlignment="Left" Width="382">
+                        <ListBox x:Name="lstPowershell" HorizontalAlignment="Center" Width="370" Height="237" VerticalAlignment="Top">
+                        </ListBox>
+                    </GroupBox>
+                    <GroupBox Header="Batch Scripts" Height="260" VerticalAlignment="Top" Margin="382,71,0,0" HorizontalAlignment="Left" Width="382">
+                        <ListBox x:Name="lstBatch" Height="237" VerticalAlignment="Center" HorizontalAlignment="Left" Width="370">
+
+                        </ListBox>
+                    </GroupBox>
+                    <Button x:Name="btnExecutePowershell" Content="Execute Powershell Script" HorizontalAlignment="Left" Margin="13,337,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btnExecuteBatch" Content="Execute Batch Script" HorizontalAlignment="Left" Margin="392,335,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
         </TabControl>
