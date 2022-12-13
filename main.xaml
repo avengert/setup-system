@@ -39,6 +39,9 @@
                     <Button x:Name="btnSetDNS" Content="Set" HorizontalAlignment="Left" Margin="172,84,0,0" VerticalAlignment="Top" Width="35"/>
                     <Button x:Name="btnSetIP" Content="Set" HorizontalAlignment="Left" Margin="172,120,0,0" VerticalAlignment="Top" Width="34"/>
                     <TextBox x:Name="txtSetIP" HorizontalAlignment="Left" Margin="15,119,0,0" TextWrapping="Wrap" Text="Set IP Address" VerticalAlignment="Top" Width="150"/>
+                    <TextBox x:Name="txtComputersToMonitor" HorizontalAlignment="Left" Margin="15,168,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="152"/>
+                    <Button x:Name="btnSetComputersToMonitor" Content="Set" HorizontalAlignment="Left" Margin="173,168,0,0" VerticalAlignment="Top" Width="34"/>
+                    <Label Content="List Of computers to monitor" HorizontalAlignment="Left" Margin="15,142,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.461,0.683"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Scripts">
@@ -55,6 +58,14 @@
                     </GroupBox>
                     <Button x:Name="btnExecutePowershell" Content="Execute Powershell Script" HorizontalAlignment="Left" Margin="13,337,0,0" VerticalAlignment="Top"/>
                     <Button x:Name="btnExecuteBatch" Content="Execute Batch Script" HorizontalAlignment="Left" Margin="392,335,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Monitor">
+                <Grid Background="#FFE5E5E5">
+                    <Label Content="Monitor Machines listed in administration" HorizontalAlignment="Left" Margin="23,11,0,0" VerticalAlignment="Top"/>
+                    <Label x:Name="lblMachine1Status" Content="Status:" HorizontalAlignment="Left" Margin="34,58,0,0" VerticalAlignment="Top"/>
+                    <Label x:Name="lblMachine2Status" Content="Status:" HorizontalAlignment="Left" Margin="34,84,0,0" VerticalAlignment="Top"/>
+
                 </Grid>
             </TabItem>
         </TabControl>
