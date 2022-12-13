@@ -21,10 +21,20 @@ $btnSetDomain.Add_Click({
   Write-Host "You have requested to set your domain as ${i}"
 })
 
-[void]$lstPowershell.Items.Add("TEST1")
+$btnShowOptionalFeatures.Add_Click({optionalfeatures})
+$btnShowApplications.Add_Click({appwiz.cpl})
+$btnControlPanel.Add_Click({control})
+$btnEnableRDP.Add_Click({systempropertiesremote})
+$btnNetworkConnections.Add_Click({ncpa.cpl})
+$btnUserPanel.Add_Click({control userpasswords2})
+
+$btnOpenPowershell.Add_Click({Start-Process powershell.exe})
+
+[void]$lstPowershell.Items.Add("cmd.exe")
 
 $btnExecutePowershell.Add_Click({
-  start-process powershell.exe
+  $i = $lstPowershell.SelectedItem
+  start-process ${i}
 })
 
 $Form.ShowDialog()
