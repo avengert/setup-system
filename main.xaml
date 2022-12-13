@@ -10,32 +10,35 @@
         <TabControl>
             <TabItem Header="Main">
                 <Grid Background="#FFE5E5E5">
-                    <Button x:Name="btnClose" Content="Close" Margin="213,303,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="54"/>
+                    <Button x:Name="btnClose" Content="Close" Margin="332,202,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="54"/>
                     <Label Content="System Setup" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="81"/>
                     <TextBlock HorizontalAlignment="Left" Height="98" Margin="237,15,0,0" TextWrapping="Wrap" Text="This system is in place to create an easy way to setup and change settings in windows. " VerticalAlignment="Top" Width="266"/>
                     <Button x:Name="btnEnableRDP" Content="Enable RDP" HorizontalAlignment="Left" Margin="31,96,0,0" VerticalAlignment="Top"/>
                     <Button x:Name="btnActivateWindows" Content="Activate Windows" HorizontalAlignment="Left" Margin="101,96,0,0" VerticalAlignment="Top" Width="123"/>
                     <Button x:Name="btnActivateOffice" Content="Activate Office" HorizontalAlignment="Left" Margin="31,121,0,0" VerticalAlignment="Top" Width="193"/>
-                    <Button x:Name="btnSetIP" Content="Set IP" HorizontalAlignment="Left" Margin="31,146,0,0" VerticalAlignment="Top" Width="107"/>
-                    <Button x:Name="btnSetDNS" Content="Set DNS" HorizontalAlignment="Left" Margin="143,146,0,0" VerticalAlignment="Top" Width="81"/>
-                    <TextBox x:Name="txtPCName" HorizontalAlignment="Left" Margin="31,171,0,0" TextWrapping="Wrap" Text="Set PC Name" VerticalAlignment="Top" Width="153" AutomationProperties.HelpText="Set PC Name"/>
-                    <Button x:Name="btnSetPCName" Content="Set" HorizontalAlignment="Left" Margin="189,171,0,0" VerticalAlignment="Top" Width="35"/>
-                    <Button x:Name="btnRemoveIE" Content="Remove IE" HorizontalAlignment="Left" Margin="31,244,0,0" VerticalAlignment="Top"/>
-                    <TextBox x:Name="txtSetDomain" HorizontalAlignment="Left" Margin="31,194,0,0" TextWrapping="Wrap" Text="Set Domain" VerticalAlignment="Top" Width="153"/>
-                    <Button x:Name="btnSetDomain" Content="Set" HorizontalAlignment="Left" Margin="189,196,0,0" VerticalAlignment="Top" Width="35"/>
-                    <Button x:Name="btnShowApplications" Content="Applications" HorizontalAlignment="Left" Margin="95,244,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnShowOptionalFeatures" Content="Optional Features" HorizontalAlignment="Left" Margin="169,244,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnSetThisPCDefault" Content="Set This PC As Default" HorizontalAlignment="Left" Margin="31,270,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnRepairSystem" Content="Start System Repair" HorizontalAlignment="Left" Margin="156,270,0,0" VerticalAlignment="Top" Width="111"/>
-                    <Button x:Name="btnEnableHyperVManager" Content="Enable Hyper-V Manager" HorizontalAlignment="Left" Margin="261,96,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnNetworkConnections" Content="Network Connections" HorizontalAlignment="Left" Margin="261,118,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnControlPanel" Content="Control Panel" HorizontalAlignment="Left" Margin="261,141,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnUserPanel" Content="Local Users" HorizontalAlignment="Left" Margin="261,165,0,0" VerticalAlignment="Top"/>
+
+                    <Button x:Name="btnRemoveIE" Content="Remove IE" HorizontalAlignment="Left" Margin="31,149,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btnShowApplications" Content="Applications" HorizontalAlignment="Left" Margin="97,149,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btnShowOptionalFeatures" Content="Optional Features" HorizontalAlignment="Left" Margin="169,149,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btnSetThisPCDefault" Content="Set This PC As Default" HorizontalAlignment="Left" Margin="30,173,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btnRepairSystem" Content="Start System Repair" HorizontalAlignment="Left" Margin="158,172,0,0" VerticalAlignment="Top" Width="111"/>
+                    <Button x:Name="btnEnableHyperVManager" Content="Enable Hyper-V Manager" HorizontalAlignment="Left" Margin="329,93,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btnNetworkConnections" Content="Network Connections" HorizontalAlignment="Left" Margin="329,115,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btnControlPanel" Content="Control Panel" HorizontalAlignment="Left" Margin="329,138,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btnUserPanel" Content="Local Users" HorizontalAlignment="Left" Margin="329,162,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Administration">
                 <Grid Background="#FFE5E5E5">
                     <Label Content="The administration panel is in development. Come back for more later." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="txtPCName" HorizontalAlignment="Left" Margin="14,38,0,0" TextWrapping="Wrap" Text="Set PC Name" VerticalAlignment="Top" Width="153" AutomationProperties.HelpText="Set PC Name"/>
+                    <Button x:Name="btnSetPCName" Content="Set" HorizontalAlignment="Left" Margin="172,38,0,0" VerticalAlignment="Top" Width="35"/>
+                    <TextBox x:Name="txtSetDomain" HorizontalAlignment="Left" Margin="14,61,0,0" TextWrapping="Wrap" Text="Set Domain" VerticalAlignment="Top" Width="153"/>
+                    <Button x:Name="btnSetDomain" Content="Set" HorizontalAlignment="Left" Margin="172,63,0,0" VerticalAlignment="Top" Width="35"/>
+                    <TextBox x:Name="txtSetDNS" HorizontalAlignment="Left" Margin="14,91,0,0" TextWrapping="Wrap" Text="Set DNS" VerticalAlignment="Top" Width="150"/>
+                    <Button x:Name="btnSetDNS" Content="Set" HorizontalAlignment="Left" Margin="172,84,0,0" VerticalAlignment="Top" Width="35"/>
+                    <Button x:Name="btnSetIP" Content="Set" HorizontalAlignment="Left" Margin="172,120,0,0" VerticalAlignment="Top" Width="34"/>
+                    <TextBox x:Name="txtSetIP" HorizontalAlignment="Left" Margin="15,119,0,0" TextWrapping="Wrap" Text="Set IP Address" VerticalAlignment="Top" Width="150"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Scripts">
