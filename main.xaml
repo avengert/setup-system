@@ -11,7 +11,7 @@
             <TabItem Header="Main">
                 <Grid Background="#FFE5E5E5">
                     <Button x:Name="btnClose" Content="Close" Margin="332,202,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="54"/>
-                    <Label Content="System Setup" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="81"/>
+                    <Label x:Name="lblConfigStatus" Content="System Setup" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="81"/>
                     <TextBlock HorizontalAlignment="Left" Height="98" Margin="237,15,0,0" TextWrapping="Wrap" Text="This system is in place to create an easy way to setup and change settings in windows. " VerticalAlignment="Top" Width="266"/>
                     <Button x:Name="btnEnableRDP" Content="Enable RDP" HorizontalAlignment="Left" Margin="31,96,0,0" VerticalAlignment="Top"/>
                     <Button x:Name="btnActivateWindows" Content="Activate Windows" HorizontalAlignment="Left" Margin="101,96,0,0" VerticalAlignment="Top" Width="123"/>

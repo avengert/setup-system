@@ -12,6 +12,21 @@ catch {
 }
 $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
 
+Function ReadConfigFile(){
+    $confFile = "$env:temp\adminConfig.conf"
+    if(Test-Path -Path $confFile){
+        foreach($i in $(Get-Content $confFile)){
+            Set-Variable -Name $i.split("=")[0] -Value $i.split("=",2)[1]
+            $lblConfigStatus.Content = "Config Loaded"
+        }
+    } else {
+        $dns = "8.8.8.8"
+        $lblConfigStatus.Content = "Config Not Loaded"
+    }
+}
+
+ReadConfigFile
+
 $btnClose.Add_Click({
   $Form.Close()
 })
@@ -56,4 +71,3 @@ $btnSetComputersToMonitor.Add_Click({
 })
 
 $Form.ShowDialog()
-$Form.Dispose()
