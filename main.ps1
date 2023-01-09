@@ -2,6 +2,7 @@ $currentUser = ${env:Username}
 #$inputXAML = Get-Content "C:\users\$currentUser\Desktop\main.xaml"
 $inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml") #uncomment for Testing
 #$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml") #uncomment for Production
+$confFile = "$env:temp\adminConfig.conf"
 $inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
 [xml]$XAML = $inputXAML
@@ -13,15 +14,19 @@ catch {
 $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
 
 Function ReadConfigFile(){
-  $confFile = "$env:temp\adminConfig.conf"
   if(Test-Path -Path $confFile){
       foreach($i in $(Get-Content $confFile)){
-          Set-Variable -Name $i.split("=")[0] -Value $i.split("=",2)[1]
-          $lblConfigStatus.Content = "Config Loaded"
+        #Write-Host $i.split("=")[0]
+        #Write-Host $i.split("=")[1]
+        Set-Variable -Name $i.split("=")[0] -Value $i.split("=",2)[1] -Scope Global
+        $lblConfigStatus.Content = "Config Loaded"
+        #$dns
+        $txtSetDNS.Text = $dns
       }
   } else {
       $dns = "8.8.8.8"
       $lblConfigStatus.Content = "Config Not Loaded"
+      echo "dns=1.1.1.1" | Out-File $confFile
   }
 }
 
@@ -71,6 +76,14 @@ $btnSetComputersToMonitor.Add_Click({
             $lblMachine1Status.Content = "Status: Down"
         }
     }
+})
+
+$btnSetDNS.Add_Click({
+  # Here we want to edit the text file, but not the other items. Just update the specific record. How do I do that?
+  $filecontent = Get-Content -Path $confFile -Raw
+  Write-Host $filecontent
+  $filecontent -replace 'dns=$($dns)', 'dns=$($txtSetDNS.Text)' | Out-File $confFile
+  ReadConfigFile
 })
 
 $Form.ShowDialog()
