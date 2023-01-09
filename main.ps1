@@ -12,6 +12,21 @@ catch {
 }
 $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
 
+Function ReadConfigFile(){
+  $confFile = "$env:temp\adminConfig.conf"
+  if(Test-Path -Path $confFile){
+      foreach($i in $(Get-Content $confFile)){
+          Set-Variable -Name $i.split("=")[0] -Value $i.split("=",2)[1]
+          $lblConfigStatus.Content = "Config Loaded"
+      }
+  } else {
+      $dns = "8.8.8.8"
+      $lblConfigStatus.Content = "Config Not Loaded"
+  }
+}
+
+ReadConfigFile
+
 $btnClose.Add_Click({
   $Form.Close()
 })
@@ -28,9 +43,11 @@ $btnEnableRDP.Add_Click({systempropertiesremote})
 $btnNetworkConnections.Add_Click({ncpa.cpl})
 $btnUserPanel.Add_Click({control userpasswords2})
 
-$btnOpenPowershell.Add_Click({Start-Process powershell.exe})
+#$btnOpenPowershell.Add_Click({Start-Process powershell.exe})
 
 [void]$lstPowershell.Items.Add("cmd.exe")
+[void]$lstPowershell.Items.Add("chrome.exe")
+[void]$lstPowershell.Items.Add("powershell.exe")
 
 $btnExecutePowershell.Add_Click({
   $i = $lstPowershell.SelectedItem
@@ -40,14 +57,15 @@ $btnExecutePowershell.Add_Click({
 $btnSetComputersToMonitor.Add_Click({
     # Put this section on a loop checking every 5 minutes possibly in a seperate thread so it doesn't lock up the app.
     # Then let it loop through a list comma seperated showing the status of each machine.
+    # My understanding is that there is an issue with websites and specific machines. Ping doesn't always work when a website status code might for a website.
     if($txtComputersToMonitor.Text -eq ""){
         $lblMachine1Status.Content = "Status: "   
         $lblMachine2Status.Content = "Status: "
     } else{
         #This needs to be in a loop
         if(Test-Connection -BufferSize 32 -Count 1 -ComputerName $txtComputersToMonitor.Text -Quiet){
-           $lblMachine1Status.Foreground = "Green"
-         $lblMachine1Status.Content = "Status: Up"   
+            $lblMachine1Status.Foreground = "Green"
+            $lblMachine1Status.Content = "$($txtComputersToMonitor.Text): Up"   
         } else {
             $lblMachine1Status.Foreground = "Red"
             $lblMachine1Status.Content = "Status: Down"
@@ -56,4 +74,3 @@ $btnSetComputersToMonitor.Add_Click({
 })
 
 $Form.ShowDialog()
-$Form.Dispose()
