@@ -55,7 +55,7 @@
                     <Label x:Name="lblCurrentip" Grid.Column="1" Content="Current IP: 255.255.255.255" HorizontalAlignment="Left" Margin="290,57,0,0" VerticalAlignment="Top"/>
                     <Label x:Name="lblCurrentSubnet" Grid.Column="1" Content="Current Subnet: 255.255.255.0" HorizontalAlignment="Left" Margin="290,81,0,0" VerticalAlignment="Top"/>
                     <Label x:Name="lblCurrentDefaultGateway" Grid.Column="1" Content="CurrentDefaultGateway: 255.255.255.255" HorizontalAlignment="Left" Margin="290,101,0,0" VerticalAlignment="Top"/>
-                    <Label x:Name="lblExternalIP" Grid.Column="1" Content="External IP: 255.255.255.255" HorizontalAlignment="Left" Margin="290,119,0,0" VerticalAlignment="Top"/>
+                    <Label x:Name="lblExternalIP" Grid.Column="1" Content="External IP: 255.255.255.255" HorizontalAlignment="Left" Margin="290,132,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Scripts">
