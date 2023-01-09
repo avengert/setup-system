@@ -1,6 +1,6 @@
 $currentUser = ${env:Username}
-#$inputXAML = Get-Content "C:\users\$currentUser\Desktop\main.xaml"
-$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml") #uncomment for Testing
+$inputXAML = Get-Content "C:\users\$currentUser\setup-system\main.xaml"
+#$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml") #uncomment for Testing
 #$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml") #uncomment for Production
 $confFile = "$env:temp\adminConfig.conf"
 $inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
@@ -16,8 +16,6 @@ $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) 
 Function ReadConfigFile(){
   if(Test-Path -Path $confFile){
       foreach($i in $(Get-Content $confFile)){
-        #Write-Host $i.split("=")[0]
-        #Write-Host $i.split("=")[1]
         if($i -eq ""){
           # This fixes the name null error
         } else {
@@ -90,9 +88,17 @@ $btnSetDNS.Add_Click({
   ReadConfigFile
 })
 
-$lblExternalIP.Add_Click({
-  $z = curl ifcfg.me
-  $lblExternalIP.Content = $z
-})
+if(Test-Connection -Ping google.com -BufferSize 32 -Count 1 -Quiet){
+  Write-Host "Internet Access Available"
+  try {
+    $lblExternalIP.Content = "External IP: $(curl ifcfg.me)"
+  }
+  catch {
+    <#Do this if a terminating exception happens#>
+    $lblExternalIP.Content = "Error Getting Connection"
+  }
+} else {
+  $lblExternalIP.Content = "External IP: Unavailable"
+}
 
 $Form.ShowDialog()
