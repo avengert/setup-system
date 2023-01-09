@@ -96,8 +96,8 @@ $btnSetPCName.Add_Click({
   Rename-Computer -NewName $txtPCName.Text
 })
 
-$z = Get-netIPAddress | where -Property AddressFamily -eq IPV4 | select -Property IPAddress
-$lblCurrentip.Content = "Current IP: $(z)"
+$z = Get-netIPAddress -InterfaceIndex 9| Where -Property AddressFamily -eq IPV4 | select -Property IPAddress
+$lblCurrentip.Content = "Current IP: $($z.IPAddress)"
 
 if(Test-Connection -Ping google.com -BufferSize 32 -Count 1 -Quiet){
   Write-Host "Internet Access Available"
@@ -112,4 +112,7 @@ if(Test-Connection -Ping google.com -BufferSize 32 -Count 1 -Quiet){
   $lblExternalIP.Content = "External IP: Unavailable"
 }
 
+# ON System Loading
+$currentDNS = Get-DnsClientServerAddress -InterfaceIndex 9 -AddressFamily IPv4 | Select-Object -Property ServerAddresses
+$lblCurrentdns.Content = "Current DNS: $($currentDNS.ServerAddresses)"
 $Form.ShowDialog()
