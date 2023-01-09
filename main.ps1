@@ -85,8 +85,19 @@ $btnSetDNS.Add_Click({
   $filecontent = Get-Content -Path $confFile -Raw
   Write-Host $filecontent
   $filecontent -replace 'dns=$($dns)', 'dns=$($txtSetDNS.Text)' | Out-File $confFile
+  Set-DnsClientServerAddress -InterfaceIndex 9 -ServerAddresses ("$($txtSetDNS.Text)")
+  $lblCurrentdns.Content = "Current DNS: $($txtSetDNS.Text)"
   ReadConfigFile
 })
+
+$txtPCName.Text = hostname
+
+$btnSetPCName.Add_Click({
+  Rename-Computer -NewName $txtPCName.Text
+})
+
+$z = Get-netIPAddress | where -Property AddressFamily -eq IPV4 | select -Property IPAddress
+$lblCurrentip.Content = "Current IP: $(z)"
 
 if(Test-Connection -Ping google.com -BufferSize 32 -Count 1 -Quiet){
   Write-Host "Internet Access Available"
