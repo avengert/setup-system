@@ -18,10 +18,14 @@ Function ReadConfigFile(){
       foreach($i in $(Get-Content $confFile)){
         #Write-Host $i.split("=")[0]
         #Write-Host $i.split("=")[1]
+        if($i -eq ""){
+          # This fixes the name null error
+        } else {
         Set-Variable -Name $i.split("=")[0] -Value $i.split("=",2)[1] -Scope Global
         $lblConfigStatus.Content = "Config Loaded"
         #$dns
         $txtSetDNS.Text = $dns
+        }
       }
   } else {
       $dns = "8.8.8.8"
@@ -79,11 +83,16 @@ $btnSetComputersToMonitor.Add_Click({
 })
 
 $btnSetDNS.Add_Click({
-  # Here we want to edit the text file, but not the other items. Just update the specific record. How do I do that?
+  # Here we want to edit the text file, but not the other items. Just update the specific record. How do I do that? Well obviously this works. 😊
   $filecontent = Get-Content -Path $confFile -Raw
   Write-Host $filecontent
   $filecontent -replace 'dns=$($dns)', 'dns=$($txtSetDNS.Text)' | Out-File $confFile
   ReadConfigFile
+})
+
+$lblExternalIP.Add_Click({
+  $z = curl ifcfg.me
+  $lblExternalIP.Content = $z
 })
 
 $Form.ShowDialog()
