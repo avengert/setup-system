@@ -1,6 +1,6 @@
 $currentUser = ${env:Username}
-$inputXAML = Get-Content "C:\users\$currentUser\setup-system\main.xaml"
-#$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml") #uncomment for Testing
+#$inputXAML = Get-Content "C:\users\$currentUser\setup-system\main.xaml"
+$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml") #uncomment for Testing
 #$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml") #uncomment for Production
 $confFile = "$env:temp\adminConfig.conf"
 $inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
