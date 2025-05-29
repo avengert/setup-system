@@ -72,7 +72,8 @@ $btnPowerShell.Add_Click({Start-Process powershell.exe})
 
 $btnSystemInfo.Add_Click({
     $currentUser = ${env:Username}
-    $sysInfoXAML = Get-Content "C:\users\$currentUser\Development\wintool\SystemInfoWindow.xaml"
+    $sysInfoXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/SystemInfoWindow.xaml") #uncomment for Production
+    #$sysInfoXAML = Get-Content "C:\users\$currentUser\Development\wintool\SystemInfoWindow.xaml"
     $sysInfoXAML = $sysInfoXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
     [xml]$sysXAML = $sysInfoXAML
     $sysReader = (New-Object System.Xml.XmlNodeReader $sysXAML)
