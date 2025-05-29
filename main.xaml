@@ -10,22 +10,65 @@
         <TabControl>
             <TabItem Header="Main">
                 <Grid Background="#FFE5E5E5">
-                    <Button x:Name="btnClose" Content="Close" Margin="332,202,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="54"/>
-                    <Label x:Name="lblConfigStatus" Content="System Setup" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="81"/>
-                    <TextBlock HorizontalAlignment="Left" Height="98" Margin="237,15,0,0" TextWrapping="Wrap" Text="This system is in place to create an easy way to setup and change settings in windows. " VerticalAlignment="Top" Width="266"/>
-                    <Button x:Name="btnEnableRDP" Content="Enable RDP" HorizontalAlignment="Left" Margin="31,96,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnActivateWindows" Content="Activate Windows" HorizontalAlignment="Left" Margin="101,96,0,0" VerticalAlignment="Top" Width="123"/>
-                    <Button x:Name="btnActivateOffice" Content="Activate Office" HorizontalAlignment="Left" Margin="31,121,0,0" VerticalAlignment="Top" Width="193"/>
-
-                    <Button x:Name="btnRemoveIE" Content="Remove IE" HorizontalAlignment="Left" Margin="31,149,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnShowApplications" Content="Applications" HorizontalAlignment="Left" Margin="97,149,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnShowOptionalFeatures" Content="Optional Features" HorizontalAlignment="Left" Margin="169,149,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnSetThisPCDefault" Content="Set This PC As Default" HorizontalAlignment="Left" Margin="30,173,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnRepairSystem" Content="Start System Repair" HorizontalAlignment="Left" Margin="158,172,0,0" VerticalAlignment="Top" Width="111"/>
-                    <Button x:Name="btnEnableHyperVManager" Content="Enable Hyper-V Manager" HorizontalAlignment="Left" Margin="329,93,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnNetworkConnections" Content="Network Connections" HorizontalAlignment="Left" Margin="329,115,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnControlPanel" Content="Control Panel" HorizontalAlignment="Left" Margin="329,138,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnUserPanel" Content="Local Users" HorizontalAlignment="Left" Margin="329,162,0,0" VerticalAlignment="Top"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- Modern Title -->
+                    <TextBlock Text="System Setup" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,20,0,20" Grid.Row="0"/>
+                    <!-- Centered Button Grid -->
+                    <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Button x:Name="btnEnableRDP" Content="Enable RDP" Margin="15" Padding="10,6" Grid.Row="0" Grid.Column="0" Width="140"/>
+                        <Button x:Name="btnActivateWindows" Content="Activate Windows" Margin="15" Padding="10,6" Grid.Row="0" Grid.Column="1" Width="140"/>
+                        <Button x:Name="btnActivateOffice" Content="Activate Office" Margin="15" Padding="10,6" Grid.Row="0" Grid.Column="2" Width="140"/>
+                        <Button x:Name="btnRemoveIE" Content="Remove IE" Margin="15" Padding="10,6" Grid.Row="1" Grid.Column="0" Width="140"/>
+                        <Button x:Name="btnShowApplications" Content="Applications" Margin="15" Padding="10,6" Grid.Row="1" Grid.Column="1" Width="140"/>
+                        <Button x:Name="btnSetThisPCDefault" Content="Set This PC As Default" Margin="15" Padding="10,6" Grid.Row="1" Grid.Column="2" Width="140"/>
+                        <Button x:Name="btnRepairSystem" Content="Start System Repair" Margin="15" Padding="10,6" Grid.Row="2" Grid.Column="0" Width="140"/>
+                        <Button x:Name="btnEnableHyperVManager" Content="Enable Hyper-V Manager" Margin="15" Padding="10,6" Grid.Row="2" Grid.Column="1" Width="140"/>
+                        <Button x:Name="btnUpgradeAll" Content="Upgrade All" Margin="15" Padding="10,6" Grid.Row="2" Grid.Column="2" Width="140"/>
+                        <Button x:Name="btnSystemInfo" Content="System Information" Margin="15" Padding="10,6" Grid.Row="3" Grid.Column="1" Width="140"/>
+                        <Button x:Name="btnRestartAsAdmin" Content="Restart as Administrator" Grid.Row="4" Grid.Column="1"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="User Management">
+                <Grid Background="#FFE5E5E5" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- User list -->
+                    <ListBox x:Name="lstLocalUsers" Grid.Row="0" Grid.Column="0" Margin="0,0,10,0"/>
+                    <!-- Action buttons below the list -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
+                        <Button x:Name="btnEnableUser" Content="Enable User" Margin="0,0,10,0" Width="100"/>
+                        <Button x:Name="btnDisableUser" Content="Disable User" Margin="0,0,10,0" Width="100"/>
+                        <Button x:Name="btnResetPassword" Content="Reset Password" Margin="0,0,10,0" Width="120"/>
+                        <Button x:Name="btnRemoveUser" Content="Remove User" Width="100"/>
+                    </StackPanel>
+                    <!-- Add user fields and button on the right -->
+                    <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+                        <TextBlock Text="Add New User" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <TextBox x:Name="txtNewUserName" Width="180" Margin="0,0,0,10"/>
+                        <PasswordBox x:Name="txtNewUserPassword" Width="180" Margin="0,0,0,10"/>
+                        <Button x:Name="btnAddUser" Content="Add User" Width="100"/>
+                    </StackPanel>
                 </Grid>
             </TabItem>
             <TabItem Header="Administration">
@@ -66,6 +109,61 @@
                     <Label x:Name="lblMachine1Status" Content="Status:" HorizontalAlignment="Left" Margin="34,58,0,0" VerticalAlignment="Top"/>
                     <Label x:Name="lblMachine2Status" Content="Status:" HorizontalAlignment="Left" Margin="34,84,0,0" VerticalAlignment="Top"/>
 
+                </Grid>
+            </TabItem>
+            <TabItem Header="Admin Tools">
+                <Grid Background="#FFE5E5E5">
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Button x:Name="btnDeviceManager" Content="Device Manager" Margin="5" Padding="5" Grid.Row="0" Grid.Column="0"/>
+                        <Button x:Name="btnEventViewer" Content="Event Viewer" Margin="5" Padding="5" Grid.Row="0" Grid.Column="1"/>
+                        <Button x:Name="btnServices" Content="Services" Margin="5" Padding="5" Grid.Row="0" Grid.Column="2"/>
+                        <Button x:Name="btnTaskManager" Content="Task Manager" Margin="5" Padding="5" Grid.Row="1" Grid.Column="0"/>
+                        <Button x:Name="btnWindowsUpdate" Content="Windows Update" Margin="5" Padding="5" Grid.Row="1" Grid.Column="1"/>
+                        <Button x:Name="btnSystemProperties" Content="System Properties" Margin="5" Padding="5" Grid.Row="1" Grid.Column="2"/>
+                        <Button x:Name="btnRegistryEditor" Content="Registry Editor" Margin="5" Padding="5" Grid.Row="2" Grid.Column="0"/>
+                        <Button x:Name="btnDiskManagement" Content="Disk Management" Margin="5" Padding="5" Grid.Row="2" Grid.Column="1"/>
+                        <Button x:Name="btnNetworkConnections2" Content="Network Connections" Margin="5" Padding="5" Grid.Row="2" Grid.Column="2"/>
+                        <Button x:Name="btnControlPanel2" Content="Control Panel" Margin="5" Padding="5" Grid.Row="3" Grid.Column="0"/>
+                        <Button x:Name="btnCmd" Content="Command Prompt" Margin="5" Padding="5" Grid.Row="3" Grid.Column="1"/>
+                        <Button x:Name="btnPowerShell" Content="PowerShell" Margin="5" Padding="5" Grid.Row="3" Grid.Column="2"/>
+                        <Button x:Name="btnShowOptionalFeatures" Content="Optional Features" Margin="5" Padding="5" Grid.Row="4" Grid.Column="0"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Network Tools">
+                <Grid Background="#FFE5E5E5" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+                        <TextBox x:Name="txtNetworkTarget" Width="200" Margin="0,0,10,0"/>
+                        <Button x:Name="btnPing" Content="Ping" Margin="0,0,10,0" Width="80"/>
+                        <Button x:Name="btnTracert" Content="Tracert" Margin="0,0,10,0" Width="80"/>
+                        <Button x:Name="btnNSLookup" Content="NSLookup" Margin="0,0,10,0" Width="80"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
+                        <Button x:Name="btnShowIPConfig" Content="Show IP Config" Margin="0,0,10,0" Width="120"/>
+                        <Button x:Name="btnReleaseDHCP" Content="Release DHCP" Margin="0,0,10,0" Width="120"/>
+                        <Button x:Name="btnRenewDHCP" Content="Renew DHCP" Margin="0,0,10,0" Width="120"/>
+                        <Button x:Name="btnFlushDNS" Content="Flush DNS" Width="120"/>
+                    </StackPanel>
+                    <TextBox x:Name="txtNetworkOutput" Grid.Row="2" Margin="0,10,0,0" Height="180" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
                 </Grid>
             </TabItem>
         </TabControl>
