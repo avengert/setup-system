@@ -14,32 +14,73 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <!-- Modern Title -->
                     <TextBlock Text="System Setup" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,20,0,20" Grid.Row="0"/>
-                    <!-- Centered Button Grid -->
-                    <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,0">
+                    <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top">
+                        <Grid.Resources>
+                            <Style TargetType="Button">
+                                <Setter Property="Margin" Value="15"/>
+                                <Setter Property="Padding" Value="10,6"/>
+                                <Setter Property="MinWidth" Value="170"/>
+                                <Setter Property="MinHeight" Value="38"/>
+                                <Setter Property="FontSize" Value="14"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="18">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="0.96" ScaleY="0.96"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Grid.Resources>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Button x:Name="btnEnableRDP" Content="Enable RDP" Margin="15" Padding="10,6" Grid.Row="0" Grid.Column="0" Width="140"/>
-                        <Button x:Name="btnActivateWindows" Content="Activate Windows" Margin="15" Padding="10,6" Grid.Row="0" Grid.Column="1" Width="140"/>
-                        <Button x:Name="btnActivateOffice" Content="Activate Office" Margin="15" Padding="10,6" Grid.Row="0" Grid.Column="2" Width="140"/>
-                        <Button x:Name="btnRemoveIE" Content="Remove IE" Margin="15" Padding="10,6" Grid.Row="1" Grid.Column="0" Width="140"/>
-                        <Button x:Name="btnShowApplications" Content="Applications" Margin="15" Padding="10,6" Grid.Row="1" Grid.Column="1" Width="140"/>
-                        <Button x:Name="btnSetThisPCDefault" Content="Set This PC As Default" Margin="15" Padding="10,6" Grid.Row="1" Grid.Column="2" Width="140"/>
-                        <Button x:Name="btnRepairSystem" Content="Start System Repair" Margin="15" Padding="10,6" Grid.Row="2" Grid.Column="0" Width="140"/>
-                        <Button x:Name="btnEnableHyperVManager" Content="Enable Hyper-V Manager" Margin="15" Padding="10,6" Grid.Row="2" Grid.Column="1" Width="140"/>
-                        <Button x:Name="btnUpgradeAll" Content="Upgrade All" Margin="15" Padding="10,6" Grid.Row="2" Grid.Column="2" Width="140"/>
-                        <Button x:Name="btnSystemInfo" Content="System Information" Margin="15" Padding="10,6" Grid.Row="3" Grid.Column="1" Width="140"/>
-                        <Button x:Name="btnRestartAsAdmin" Content="Restart as Administrator" Grid.Row="4" Grid.Column="1"/>
+                        <Button x:Name="btnEnableRDP" Content="Enable RDP" Grid.Row="0" Grid.Column="0"/>
+                        <Button x:Name="btnActivateWindows" Content="Activate Windows" Grid.Row="0" Grid.Column="1"/>
+                        <Button x:Name="btnActivateOffice" Content="Activate Office" Grid.Row="0" Grid.Column="2"/>
+                        <Button x:Name="btnRemoveIE" Content="Remove IE" Grid.Row="1" Grid.Column="0"/>
+                        <Button x:Name="btnShowApplications" Content="Applications" Grid.Row="1" Grid.Column="1"/>
+                        <Button x:Name="btnSetThisPCDefault" Content="Set This PC As Default" Grid.Row="1" Grid.Column="2"/>
+                        <Button x:Name="btnRepairSystem" Content="Start System Repair" Grid.Row="2" Grid.Column="0"/>
+                        <Button x:Name="btnEnableHyperVManager" Content="Enable Hyper-V Manager" Grid.Row="2" Grid.Column="1"/>
+                        <Button x:Name="btnUpgradeAll" Content="Upgrade All" Grid.Row="2" Grid.Column="2"/>
+                        <Button x:Name="btnSystemInfo" Content="System Information" Grid.Row="3" Grid.Column="1"/>
+                        <Button x:Name="btnRestartAsAdmin" Content="Restart as Administrator" Grid.Row="5" Grid.Column="1"/>
+                        <Button x:Name="btnInstallLatestCU" Content="Install Latest Cumulative Update" Grid.Row="6" Grid.Column="1"/>
                     </Grid>
                 </Grid>
             </TabItem>
@@ -88,19 +129,37 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Scripts">
-                <Grid Background="#FFE5E5E5">
-                    <Label Content="This panel is for scripts. To execute a script simply select it in the list, and click execute below." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-                    <GroupBox Header="Powershell" Height="260" VerticalAlignment="Top" Margin="10,71,0,0" HorizontalAlignment="Left" Width="382">
-                        <ListBox x:Name="lstPowershell" HorizontalAlignment="Center" Width="370" Height="237" VerticalAlignment="Top">
-                        </ListBox>
-                    </GroupBox>
-                    <GroupBox Header="Batch Scripts" Height="260" VerticalAlignment="Top" Margin="382,71,0,0" HorizontalAlignment="Left" Width="382">
-                        <ListBox x:Name="lstBatch" Height="237" VerticalAlignment="Center" HorizontalAlignment="Left" Width="370">
-
-                        </ListBox>
-                    </GroupBox>
-                    <Button x:Name="btnExecutePowershell" Content="Execute Powershell Script" HorizontalAlignment="Left" Margin="13,337,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btnExecuteBatch" Content="Execute Batch Script" HorizontalAlignment="Left" Margin="392,335,0,0" VerticalAlignment="Top"/>
+                <Grid Background="#FFE5E5E5" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- Script List and Browse -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Label Content="Scripts:" VerticalAlignment="Center"/>
+                        <Button x:Name="btnBrowseScripts" Content="Browse..." Margin="10,0,0,0" Width="80"/>
+                    </StackPanel>
+                    <ListBox x:Name="lstScripts" Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" AllowDrop="True" ToolTip="Drag and drop .ps1 or .bat files here"/>
+                    <!-- Script Preview -->
+                    <TextBox x:Name="txtScriptPreview" Grid.Row="1" Grid.Column="1" Height="120" Margin="0,0,0,10" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
+                    <!-- Arguments and Run Options -->
+                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Label Content="Arguments:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtScriptArgs" Width="180" Margin="5,0,10,0"/>
+                        <CheckBox x:Name="chkRunAsAdmin" Content="Run as Admin" VerticalAlignment="Center"/>
+                        <Button x:Name="btnExecuteScript" Content="Execute" Margin="10,0,0,0" Width="90"/>
+                        <Button x:Name="btnClearOutput" Content="Clear Output" Margin="10,0,0,0" Width="100"/>
+                    </StackPanel>
+                    <!-- Output -->
+                    <TextBox x:Name="txtScriptOutput" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,0,10" Height="160" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
+                    <Button x:Name="btnSaveOutput" Content="Save Output" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" Width="120"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Monitor">
@@ -164,6 +223,21 @@
                         <Button x:Name="btnFlushDNS" Content="Flush DNS" Width="120"/>
                     </StackPanel>
                     <TextBox x:Name="txtNetworkOutput" Grid.Row="2" Margin="0,10,0,0" Height="180" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Software Inventory">
+                <Grid Background="#FFE5E5E5" Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBox x:Name="txtAppSearch" Grid.Row="0" Margin="0,0,0,10" Width="300" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <ListBox x:Name="lstInstalledApps" Grid.Row="1" Margin="0,0,0,10"/>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Button x:Name="btnChangeApp" Content="Change" Margin="0,0,10,0" Width="100"/>
+                        <Button x:Name="btnUninstallApp" Content="Uninstall" Width="100"/>
+                    </StackPanel>
                 </Grid>
             </TabItem>
         </TabControl>
