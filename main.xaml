@@ -7,238 +7,489 @@
         mc:Ignorable="d"
         Title="System-Setup" Height="430" Width="775">
     <Grid Margin="0,0,0,-6">
+        <Grid.Resources>
+            <Style TargetType="Button">
+                <Setter Property="Margin" Value="15"/>
+                <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="MinWidth" Value="170"/>
+                <Setter Property="MinHeight" Value="38"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="18">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.96" ScaleY="0.96"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="ToggleSwitchStyle" TargetType="ToggleButton">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Grid>
+                                <Border x:Name="Border" Width="50" Height="24" CornerRadius="12" Background="#FFE0E0E0">
+                                    <Ellipse x:Name="Dot" Width="20" Height="20" Fill="White" HorizontalAlignment="Left" Margin="2,0,0,0"/>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="#FF007ACC"/>
+                                    <Setter TargetName="Dot" Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter TargetName="Dot" Property="Margin" Value="0,0,2,0"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
         <TabControl>
             <TabItem Header="Main">
-                <Grid Background="#FFE5E5E5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="System Setup" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,20,0,20" Grid.Row="0"/>
-                    <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top">
-                        <Grid.Resources>
-                            <Style TargetType="Button">
-                                <Setter Property="Margin" Value="15"/>
-                                <Setter Property="Padding" Value="10,6"/>
-                                <Setter Property="MinWidth" Value="170"/>
-                                <Setter Property="MinHeight" Value="38"/>
-                                <Setter Property="FontSize" Value="14"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="18">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="RenderTransform">
-                                                        <Setter.Value>
-                                                            <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
-                                                </Trigger>
-                                                <Trigger Property="IsPressed" Value="True">
-                                                    <Setter Property="RenderTransform">
-                                                        <Setter.Value>
-                                                            <ScaleTransform ScaleX="0.96" ScaleY="0.96"/>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Grid.Resources>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Background="#FFE5E5E5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="40"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Button x:Name="btnEnableRDP" Content="Enable RDP" Grid.Row="0" Grid.Column="0"/>
-                        <Button x:Name="btnActivateWindows" Content="Activate Windows" Grid.Row="0" Grid.Column="1"/>
-                        <Button x:Name="btnActivateOffice" Content="Activate Office" Grid.Row="0" Grid.Column="2"/>
-                        <Button x:Name="btnRemoveIE" Content="Remove IE" Grid.Row="1" Grid.Column="0"/>
-                        <Button x:Name="btnShowApplications" Content="Applications" Grid.Row="1" Grid.Column="1"/>
-                        <Button x:Name="btnSetThisPCDefault" Content="Set This PC As Default" Grid.Row="1" Grid.Column="2"/>
-                        <Button x:Name="btnRepairSystem" Content="Start System Repair" Grid.Row="2" Grid.Column="0"/>
-                        <Button x:Name="btnEnableHyperVManager" Content="Enable Hyper-V Manager" Grid.Row="2" Grid.Column="1"/>
-                        <Button x:Name="btnUpgradeAll" Content="Upgrade All" Grid.Row="2" Grid.Column="2"/>
-                        <Button x:Name="btnSystemInfo" Content="System Information" Grid.Row="3" Grid.Column="1"/>
-                        <Button x:Name="btnRestartAsAdmin" Content="Restart as Administrator" Grid.Row="5" Grid.Column="1"/>
-                        <Button x:Name="btnInstallLatestCU" Content="Install Latest Cumulative Update" Grid.Row="6" Grid.Column="1"/>
+                        <!-- Theme toggle and status -->
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Right" Margin="0,20,20,0">
+                            <Label x:Name="lblVersionInfo" 
+                                   Content="Version: Loading..." 
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,10,0"/>
+                            <ToggleButton x:Name="chkThemeToggle" Style="{StaticResource ToggleSwitchStyle}" VerticalAlignment="Center"/>
+                            <Label x:Name="lblThemeStatus" Content="" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </StackPanel>
+                        <!-- System Setup Header -->
+                        <TextBlock Text="System Setup" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,20,0,20" Grid.Row="1"/>
+
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <Grid x:Name="MainButtonGrid" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" MinWidth="180"/>
+                                    <ColumnDefinition Width="*" MinWidth="180"/>
+                                    <ColumnDefinition Width="*" MinWidth="180"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <Button x:Name="btnEnableRDP" Content="Enable RDP" Grid.Row="0" Grid.Column="0"/>
+                                <Button x:Name="btnActivateWindows" Content="Activate Windows" Grid.Row="0" Grid.Column="1"/>
+                                <Button x:Name="btnActivateOffice" Content="Activate Office" Grid.Row="0" Grid.Column="2"/>
+                                
+                                <Button x:Name="btnRemoveIE" Content="Remove IE" Grid.Row="1" Grid.Column="0"/>
+                                <Button x:Name="btnShowApplications" Content="Applications" Grid.Row="1" Grid.Column="1"/>
+                                <Button x:Name="btnSetThisPCDefault" Content="Set This PC As Default" Grid.Row="1" Grid.Column="2"/>
+                                
+                                <Button x:Name="btnRepairSystem" Content="Start System Repair" Grid.Row="2" Grid.Column="0"/>
+                                <Button x:Name="btnEnableHyperVManager" Content="Enable Hyper-V Manager" Grid.Row="2" Grid.Column="1"/>
+                                <Button x:Name="btnUpgradeAll" Content="Upgrade All" Grid.Row="2" Grid.Column="2"/>
+                                
+                                <Button x:Name="btnSystemInfo" Content="System Information" Grid.Row="3" Grid.Column="1"/>
+                                <Button x:Name="btnRestartAsAdmin" Content="Restart as Administrator" Grid.Row="3" Grid.Column="2"/>
+                                <Button x:Name="btnInstallLatestCU" Content="Install Latest Cumulative Update" Grid.Row="4" Grid.Column="1"/>
+                                
+                            </Grid>
+                        </ScrollViewer>
                     </Grid>
-                </Grid>
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="User Management">
-                <Grid Background="#FFE5E5E5" Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="1*"/>
-                    </Grid.ColumnDefinitions>
-                    <!-- User list -->
-                    <ListBox x:Name="lstLocalUsers" Grid.Row="0" Grid.Column="0" Margin="0,0,10,0"/>
-                    <!-- Action buttons below the list -->
-                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
-                        <Button x:Name="btnEnableUser" Content="Enable User" Margin="0,0,10,0" Width="100"/>
-                        <Button x:Name="btnDisableUser" Content="Disable User" Margin="0,0,10,0" Width="100"/>
-                        <Button x:Name="btnResetPassword" Content="Reset Password" Margin="0,0,10,0" Width="120"/>
-                        <Button x:Name="btnRemoveUser" Content="Remove User" Width="100"/>
-                    </StackPanel>
-                    <!-- Add user fields and button on the right -->
-                    <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Top" HorizontalAlignment="Stretch">
-                        <TextBlock Text="Add New User" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <TextBox x:Name="txtNewUserName" Width="180" Margin="0,0,0,10"/>
-                        <PasswordBox x:Name="txtNewUserPassword" Width="180" Margin="0,0,0,10"/>
-                        <Button x:Name="btnAddUser" Content="Add User" Width="100"/>
-                    </StackPanel>
-                </Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Background="#FFE5E5E5" Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- User list -->
+                        <ListBox x:Name="lstLocalUsers" Grid.Row="0" Grid.Column="0" Margin="0,0,10,0"/>
+                        <!-- Action buttons below the list -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
+                            <Button x:Name="btnEnableUser" Content="Enable User" Margin="0,0,10,0" Width="100"/>
+                            <Button x:Name="btnDisableUser" Content="Disable User" Margin="0,0,10,0" Width="100"/>
+                            <Button x:Name="btnResetPassword" Content="Reset Password" Margin="0,0,10,0" Width="120"/>
+                            <Button x:Name="btnRemoveUser" Content="Remove User" Width="100"/>
+                        </StackPanel>
+                        <!-- Add user fields and button on the right -->
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+                            <TextBlock Text="Add New User" FontWeight="Bold" Margin="0,0,0,10"/>
+                            <TextBox x:Name="txtNewUserName" Width="180" Margin="0,0,0,10"/>
+                            <PasswordBox x:Name="txtNewUserPassword" Width="180" Margin="0,0,0,10"/>
+                            <Button x:Name="btnAddUser" Content="Add User" Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="Administration">
-                <Grid Background="#FFE5E5E5">
-                    <Label Content="The administration panel is in development. Come back for more later." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-                    <TextBox x:Name="txtPCName" HorizontalAlignment="Left" Margin="14,38,0,0" TextWrapping="Wrap" Text="Set PC Name" VerticalAlignment="Top" Width="153" AutomationProperties.HelpText="Set PC Name"/>
-                    <Button x:Name="btnSetPCName" Content="Set" HorizontalAlignment="Left" Margin="172,38,0,0" VerticalAlignment="Top" Width="35"/>
-                    <TextBox x:Name="txtSetDomain" HorizontalAlignment="Left" Margin="14,61,0,0" TextWrapping="Wrap" Text="Set Domain" VerticalAlignment="Top" Width="153"/>
-                    <Button x:Name="btnSetDomain" Content="Set" HorizontalAlignment="Left" Margin="172,63,0,0" VerticalAlignment="Top" Width="35"/>
-                    <TextBox x:Name="txtSetDNS" HorizontalAlignment="Left" Margin="14,91,0,0" TextWrapping="Wrap" Text="Set DNS" VerticalAlignment="Top" Width="150"/>
-                    <Button x:Name="btnSetDNS" Content="Set" HorizontalAlignment="Left" Margin="172,84,0,0" VerticalAlignment="Top" Width="35"/>
-                    <Button x:Name="btnSetIP" Content="Set" HorizontalAlignment="Left" Margin="172,120,0,0" VerticalAlignment="Top" Width="34"/>
-                    <TextBox x:Name="txtSetIP" HorizontalAlignment="Left" Margin="15,119,0,0" TextWrapping="Wrap" Text="Set IP Address" VerticalAlignment="Top" Width="150"/>
-                    <TextBox x:Name="txtComputersToMonitor" HorizontalAlignment="Left" Margin="15,168,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="152"/>
-                    <Button x:Name="btnSetComputersToMonitor" Content="Set" HorizontalAlignment="Left" Margin="173,168,0,0" VerticalAlignment="Top" Width="34"/>
-                    <Label Content="List Of computers to monitor" HorizontalAlignment="Left" Margin="15,142,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.461,0.683"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Scripts">
-                <Grid Background="#FFE5E5E5" Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="2*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="3*"/>
-                    </Grid.ColumnDefinitions>
-                    <!-- Script List and Browse -->
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,10">
-                        <Label Content="Scripts:" VerticalAlignment="Center"/>
-                        <Button x:Name="btnBrowseScripts" Content="Browse..." Margin="10,0,0,0" Width="80"/>
-                    </StackPanel>
-                    <ListBox x:Name="lstScripts" Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" AllowDrop="True" ToolTip="Drag and drop .ps1 or .bat files here"/>
-                    <!-- Script Preview -->
-                    <TextBox x:Name="txtScriptPreview" Grid.Row="1" Grid.Column="1" Height="120" Margin="0,0,0,10" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
-                    <!-- Arguments and Run Options -->
-                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
-                        <Label Content="Arguments:" VerticalAlignment="Center"/>
-                        <TextBox x:Name="txtScriptArgs" Width="180" Margin="5,0,10,0"/>
-                        <CheckBox x:Name="chkRunAsAdmin" Content="Run as Admin" VerticalAlignment="Center"/>
-                        <Button x:Name="btnExecuteScript" Content="Execute" Margin="10,0,0,0" Width="90"/>
-                        <Button x:Name="btnClearOutput" Content="Clear Output" Margin="10,0,0,0" Width="100"/>
-                    </StackPanel>
-                    <!-- Output -->
-                    <TextBox x:Name="txtScriptOutput" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,0,10" Height="160" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
-                    <Button x:Name="btnSaveOutput" Content="Save Output" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" Width="120"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Monitor">
-                <Grid Background="#FFE5E5E5">
-                    <Label Content="Monitor Machines listed in administration" HorizontalAlignment="Left" Margin="23,11,0,0" VerticalAlignment="Top"/>
-                    <Label x:Name="lblMachine1Status" Content="Status:" HorizontalAlignment="Left" Margin="34,58,0,0" VerticalAlignment="Top"/>
-                    <Label x:Name="lblMachine2Status" Content="Status:" HorizontalAlignment="Left" Margin="34,84,0,0" VerticalAlignment="Top"/>
-
-                </Grid>
-            </TabItem>
-            <TabItem Header="Admin Tools">
-                <Grid Background="#FFE5E5E5">
-                    <Grid Margin="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Background="#FFE5E5E5" Margin="30,20,30,20" HorizontalAlignment="Center">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="PC Name:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,8,0,8"/>
+                        <TextBox x:Name="txtPCName" Grid.Row="0" Grid.Column="1" Margin="0,8,0,8" HorizontalAlignment="Stretch" MinWidth="200"/>
+                        <Button x:Name="btnSetPCName" Content="Set" Grid.Row="0" Grid.Column="2" Width="60" Margin="10,8,0,8"/>
+
+                        <Label Content="Domain:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,8,0,8"/>
+                        <TextBox x:Name="txtSetDomain" Grid.Row="1" Grid.Column="1" Margin="0,8,0,8" HorizontalAlignment="Stretch" MinWidth="200"/>
+                        <Button x:Name="btnSetDomain" Content="Set" Grid.Row="1" Grid.Column="2" Width="60" Margin="10,8,0,8"/>
+
+                        <Label Content="DNS Server:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="0,8,0,8"/>
+                        <TextBox x:Name="txtSetDNS" Grid.Row="2" Grid.Column="1" Margin="0,8,0,8" HorizontalAlignment="Stretch" MinWidth="200"/>
+                        <Button x:Name="btnSetDNS" Content="Set" Grid.Row="2" Grid.Column="2" Width="60" Margin="10,8,0,8"/>
+
+                        <Label Content="IP Address:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Margin="0,8,0,8"/>
+                        <TextBox x:Name="txtSetIP" Grid.Row="3" Grid.Column="1" Margin="0,8,0,8" HorizontalAlignment="Stretch" MinWidth="200"/>
+                        <Button x:Name="btnSetIP" Content="Set" Grid.Row="3" Grid.Column="2" Width="60" Margin="10,8,0,8"/>
+
+                        <Label Content="Computers to Monitor:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Margin="0,8,0,8"/>
+                        <TextBox x:Name="txtComputersToMonitor" Grid.Row="4" Grid.Column="1" Margin="0,8,0,8" HorizontalAlignment="Stretch" MinWidth="200"/>
+                        <Button x:Name="btnSetComputersToMonitor" Content="Set" Grid.Row="4" Grid.Column="2" Width="60" Margin="10,8,0,8"/>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Scripts">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Background="#FFE5E5E5" Margin="10">
+                        <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="2*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Button x:Name="btnDeviceManager" Content="Device Manager" Margin="5" Padding="5" Grid.Row="0" Grid.Column="0"/>
-                        <Button x:Name="btnEventViewer" Content="Event Viewer" Margin="5" Padding="5" Grid.Row="0" Grid.Column="1"/>
-                        <Button x:Name="btnServices" Content="Services" Margin="5" Padding="5" Grid.Row="0" Grid.Column="2"/>
-                        <Button x:Name="btnTaskManager" Content="Task Manager" Margin="5" Padding="5" Grid.Row="1" Grid.Column="0"/>
-                        <Button x:Name="btnWindowsUpdate" Content="Windows Update" Margin="5" Padding="5" Grid.Row="1" Grid.Column="1"/>
-                        <Button x:Name="btnSystemProperties" Content="System Properties" Margin="5" Padding="5" Grid.Row="1" Grid.Column="2"/>
-                        <Button x:Name="btnRegistryEditor" Content="Registry Editor" Margin="5" Padding="5" Grid.Row="2" Grid.Column="0"/>
-                        <Button x:Name="btnDiskManagement" Content="Disk Management" Margin="5" Padding="5" Grid.Row="2" Grid.Column="1"/>
-                        <Button x:Name="btnNetworkConnections2" Content="Network Connections" Margin="5" Padding="5" Grid.Row="2" Grid.Column="2"/>
-                        <Button x:Name="btnControlPanel2" Content="Control Panel" Margin="5" Padding="5" Grid.Row="3" Grid.Column="0"/>
-                        <Button x:Name="btnCmd" Content="Command Prompt" Margin="5" Padding="5" Grid.Row="3" Grid.Column="1"/>
-                        <Button x:Name="btnPowerShell" Content="PowerShell" Margin="5" Padding="5" Grid.Row="3" Grid.Column="2"/>
-                        <Button x:Name="btnShowOptionalFeatures" Content="Optional Features" Margin="5" Padding="5" Grid.Row="4" Grid.Column="0"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="3*"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- Script List and Browse -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,10">
+                            <Label Content="Scripts:" VerticalAlignment="Center"/>
+                            <Button x:Name="btnBrowseScripts" Content="Browse..." Margin="10,0,0,0" Width="80"/>
+                        </StackPanel>
+                        <ListBox x:Name="lstScripts" Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" AllowDrop="True" ToolTip="Drag and drop .ps1 or .bat files here"/>
+                        <!-- Script Preview -->
+                        <TextBox x:Name="txtScriptPreview" Grid.Row="1" Grid.Column="1" Height="120" Margin="0,0,0,10" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
+                        <!-- Arguments and Run Options -->
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+                            <Label Content="Arguments:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtScriptArgs" Width="180" Margin="5,0,10,0"/>
+                            <CheckBox x:Name="chkRunAsAdmin" Content="Run as Admin" VerticalAlignment="Center"/>
+                            <Button x:Name="btnExecuteScript" Content="Execute" Margin="10,0,0,0" Width="90"/>
+                            <Button x:Name="btnClearOutput" Content="Clear Output" Margin="10,0,0,0" Width="100"/>
+                        </StackPanel>
+                        <!-- Output -->
+                        <TextBox x:Name="txtScriptOutput" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,0,10" Height="160" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
+                        <Button x:Name="btnSaveOutput" Content="Save Output" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" Width="120"/>
                     </Grid>
-                </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Monitor">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Background="#FFE5E5E5">
+                        <Label Content="Monitor Machines listed in administration" HorizontalAlignment="Left" Margin="23,11,0,0" VerticalAlignment="Top"/>
+                        <Label x:Name="lblMachine1Status" Content="Status:" HorizontalAlignment="Left" Margin="34,58,0,0" VerticalAlignment="Top"/>
+                        <Label x:Name="lblMachine2Status" Content="Status:" HorizontalAlignment="Left" Margin="34,84,0,0" VerticalAlignment="Top"/>
+
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Admin Tools">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Background="#FFE5E5E5">
+                        <Grid Margin="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="btnDeviceManager" Content="Device Manager" Margin="5" Padding="5" Grid.Row="0" Grid.Column="0"/>
+                            <Button x:Name="btnEventViewer" Content="Event Viewer" Margin="5" Padding="5" Grid.Row="0" Grid.Column="1"/>
+                            <Button x:Name="btnServices" Content="Services" Margin="5" Padding="5" Grid.Row="0" Grid.Column="2"/>
+                            <Button x:Name="btnTaskManager" Content="Task Manager" Margin="5" Padding="5" Grid.Row="1" Grid.Column="0"/>
+                            <Button x:Name="btnWindowsUpdate" Content="Windows Update" Margin="5" Padding="5" Grid.Row="1" Grid.Column="1"/>
+                            <Button x:Name="btnSystemProperties" Content="System Properties" Margin="5" Padding="5" Grid.Row="1" Grid.Column="2"/>
+                            <Button x:Name="btnRegistryEditor" Content="Registry Editor" Margin="5" Padding="5" Grid.Row="2" Grid.Column="0"/>
+                            <Button x:Name="btnDiskManagement" Content="Disk Management" Margin="5" Padding="5" Grid.Row="2" Grid.Column="1"/>
+                            <Button x:Name="btnNetworkConnections2" Content="Network Connections" Margin="5" Padding="5" Grid.Row="2" Grid.Column="2"/>
+                            <Button x:Name="btnControlPanel2" Content="Control Panel" Margin="5" Padding="5" Grid.Row="3" Grid.Column="0"/>
+                            <Button x:Name="btnCmd" Content="Command Prompt" Margin="5" Padding="5" Grid.Row="3" Grid.Column="1"/>
+                            <Button x:Name="btnPowerShell" Content="PowerShell" Margin="5" Padding="5" Grid.Row="3" Grid.Column="2"/>
+                            <Button x:Name="btnShowOptionalFeatures" Content="Optional Features" Margin="5" Padding="5" Grid.Row="4" Grid.Column="0"/>
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="Network Tools">
-                <Grid Background="#FFE5E5E5" Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
-                        <TextBox x:Name="txtNetworkTarget" Width="200" Margin="0,0,10,0"/>
-                        <Button x:Name="btnPing" Content="Ping" Margin="0,0,10,0" Width="80"/>
-                        <Button x:Name="btnTracert" Content="Tracert" Margin="0,0,10,0" Width="80"/>
-                        <Button x:Name="btnNSLookup" Content="NSLookup" Margin="0,0,10,0" Width="80"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
-                        <Button x:Name="btnShowIPConfig" Content="Show IP Config" Margin="0,0,10,0" Width="120"/>
-                        <Button x:Name="btnReleaseDHCP" Content="Release DHCP" Margin="0,0,10,0" Width="120"/>
-                        <Button x:Name="btnRenewDHCP" Content="Renew DHCP" Margin="0,0,10,0" Width="120"/>
-                        <Button x:Name="btnFlushDNS" Content="Flush DNS" Width="120"/>
-                    </StackPanel>
-                    <TextBox x:Name="txtNetworkOutput" Grid.Row="2" Margin="0,10,0,0" Height="180" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
-                </Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Background="#FFE5E5E5" Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+                            <TextBox x:Name="txtNetworkTarget" Width="200" Margin="0,0,10,0"/>
+                            <Button x:Name="btnPing" Content="Ping" Margin="0,0,10,0" Width="80"/>
+                            <Button x:Name="btnTracert" Content="Tracert" Margin="0,0,10,0" Width="80"/>
+                            <Button x:Name="btnNSLookup" Content="NSLookup" Margin="0,0,10,0" Width="80"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
+                            <Button x:Name="btnShowIPConfig" Content="Show IP Config" Margin="0,0,10,0" Width="120"/>
+                            <Button x:Name="btnReleaseDHCP" Content="Release DHCP" Margin="0,0,10,0" Width="120"/>
+                            <Button x:Name="btnRenewDHCP" Content="Renew DHCP" Margin="0,0,10,0" Width="120"/>
+                            <Button x:Name="btnFlushDNS" Content="Flush DNS" Width="120"/>
+                        </StackPanel>
+                        <TextBox x:Name="txtNetworkOutput" Grid.Row="2" Margin="0,10,0,0" Height="180" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="Software Inventory">
-                <Grid Background="#FFE5E5E5" Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBox x:Name="txtAppSearch" Grid.Row="0" Margin="0,0,0,10" Width="300" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <ListBox x:Name="lstInstalledApps" Grid.Row="1" Margin="0,0,0,10"/>
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                        <Button x:Name="btnChangeApp" Content="Change" Margin="0,0,10,0" Width="100"/>
-                        <Button x:Name="btnUninstallApp" Content="Uninstall" Width="100"/>
-                    </StackPanel>
-                </Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Background="#FFE5E5E5" Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBox x:Name="txtAppSearch" Grid.Row="0" Margin="0,0,0,10" Width="300" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                        <ListBox x:Name="lstInstalledApps" Grid.Row="1" Margin="0,0,0,10"/>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Button x:Name="btnChangeApp" Content="Change" Margin="0,0,10,0" Width="100"/>
+                            <Button x:Name="btnUninstallApp" Content="Uninstall" Width="100"/>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="PUP Removal">
+                <ScrollViewer>
+                    <Grid x:Name="pupGrid" Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                            <CheckBox x:Name="chkSelectAllPUPs" Content="Select All" Margin="0,0,10,0"/>
+                            <Label Content="Select programs to remove:" VerticalAlignment="Center"/>
+                            <Button x:Name="btnRefreshPUPs" 
+                                    Content="Refresh PUP List" 
+                                    Margin="10,0,0,0"
+                                    Padding="20,10"
+                                    HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        
+                        <ItemsControl x:Name="lstPUPs" Grid.Row="1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Name}" 
+                                             IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                             Margin="5"
+                                             Padding="5"
+                                             MinWidth="200"
+                                             MaxWidth="300"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <Button x:Name="btnRemovePUPs" 
+                                Content="Remove Selected Programs" 
+                                Grid.Row="2"
+                                Margin="0,10,0,0"
+                                Padding="20,10"
+                                HorizontalAlignment="Right"/>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Settings">
+                <ScrollViewer>
+                    <Grid x:Name="settingsGrid" Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Settings Navigation -->
+                        <ListBox x:Name="lstSettingsCategories" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="0,0,10,0">
+                            <ListBoxItem Content="General Settings"/>
+                            <ListBoxItem Content="Network Settings"/>
+                            <ListBoxItem Content="Remote Access"/>
+                            <ListBoxItem Content="Backup Settings"/>
+                            <ListBoxItem Content="Security Settings"/>
+                        </ListBox>
+
+                        <!-- Settings Content -->
+                        <Grid x:Name="settingsContent" Grid.Row="0" Grid.Column="1">
+                            <!-- General Settings -->
+                            <StackPanel x:Name="generalSettings" Visibility="Visible">
+                                <GroupBox Header="Application Settings" Margin="0,0,0,10">
+                                    <StackPanel Margin="10">
+                                        <CheckBox x:Name="chkAutoUpdate" Content="Check for updates on startup" Margin="0,5"/>
+                                        <CheckBox x:Name="chkSaveWindowSize" Content="Remember window size and position" Margin="0,5"/>
+                                        <CheckBox x:Name="chkStartMinimized" Content="Start minimized to system tray" Margin="0,5"/>
+                                    </StackPanel>
+                                </GroupBox>
+                                <GroupBox Header="Default Tools" Margin="0,0,0,10">
+                                    <StackPanel Margin="10">
+                                        <Label Content="Default DNS Server:"/>
+                                        <TextBox x:Name="txtDefaultDNS" Margin="0,5,0,10"/>
+                                        <Label Content="Default Remote Credentials:"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                                            <TextBox x:Name="txtDefaultUsername" Width="150" Margin="0,0,5,0"/>
+                                            <PasswordBox x:Name="txtDefaultPassword" Width="150"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- Network Settings -->
+                            <StackPanel x:Name="networkSettings" Visibility="Collapsed">
+                                <GroupBox Header="Network Configuration" Margin="0,0,0,10">
+                                    <StackPanel Margin="10">
+                                        <Label Content="Default Gateway:"/>
+                                        <TextBox x:Name="txtDefaultGateway" Margin="0,5,0,10"/>
+                                        <Label Content="Subnet Mask:"/>
+                                        <TextBox x:Name="txtSubnetMask" Margin="0,5,0,10"/>
+                                        <Label Content="Preferred DNS:"/>
+                                        <TextBox x:Name="txtPreferredDNS" Margin="0,5,0,10"/>
+                                        <Label Content="Alternate DNS:"/>
+                                        <TextBox x:Name="txtAlternateDNS" Margin="0,5,0,10"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- Remote Access Settings -->
+                            <StackPanel x:Name="remoteSettings" Visibility="Collapsed">
+                                <GroupBox Header="Remote Access Configuration" Margin="0,0,0,10">
+                                    <StackPanel Margin="10">
+                                        <Label Content="Default Remote Port:"/>
+                                        <TextBox x:Name="txtRemotePort" Margin="0,5,0,10"/>
+                                        <CheckBox x:Name="chkEnableRDP" Content="Enable Remote Desktop" Margin="0,5"/>
+                                        <CheckBox x:Name="chkAllowRemoteAssistance" Content="Allow Remote Assistance" Margin="0,5"/>
+                                        <Label Content="Trusted Remote Computers:"/>
+                                        <ListBox x:Name="lstTrustedComputers" Height="100" Margin="0,5,0,5"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                                            <TextBox x:Name="txtNewTrustedComputer" Width="200" Margin="0,0,5,0"/>
+                                            <Button x:Name="btnAddTrustedComputer" Content="Add" Width="60"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- Backup Settings -->
+                            <StackPanel x:Name="backupSettings" Visibility="Collapsed">
+                                <GroupBox Header="Backup Configuration" Margin="0,0,0,10">
+                                    <StackPanel Margin="10">
+                                        <Label Content="Backup Location:"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+                                            <TextBox x:Name="txtBackupLocation" Width="300" Margin="0,0,5,0"/>
+                                            <Button x:Name="btnBrowseBackup" Content="Browse" Width="60"/>
+                                        </StackPanel>
+                                        <CheckBox x:Name="chkAutoBackup" Content="Enable automatic backups" Margin="0,5"/>
+                                        <Label Content="Backup Schedule:"/>
+                                        <ComboBox x:Name="cmbBackupSchedule" Margin="0,5,0,10">
+                                            <ComboBoxItem Content="Daily"/>
+                                            <ComboBoxItem Content="Weekly"/>
+                                            <ComboBoxItem Content="Monthly"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- Security Settings -->
+                            <StackPanel x:Name="securitySettings" Visibility="Collapsed">
+                                <GroupBox Header="Security Configuration" Margin="0,0,0,10">
+                                    <StackPanel Margin="10">
+                                        <CheckBox x:Name="chkEnableFirewall" Content="Enable Windows Firewall" Margin="0,5"/>
+                                        <CheckBox x:Name="chkEnableDefender" Content="Enable Windows Defender" Margin="0,5"/>
+                                        <CheckBox x:Name="chkAutoScan" Content="Enable automatic scanning" Margin="0,5"/>
+                                        <Label Content="Scan Schedule:"/>
+                                        <ComboBox x:Name="cmbScanSchedule" Margin="0,5,0,10">
+                                            <ComboBoxItem Content="Daily"/>
+                                            <ComboBoxItem Content="Weekly"/>
+                                            <ComboBoxItem Content="Monthly"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Save Button -->
+                        <Button x:Name="btnSaveSettings" 
+                                Content="Save Settings" 
+                                Grid.Row="1" 
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Margin="0,10,0,0"
+                                Padding="20,10"/>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </Grid>
