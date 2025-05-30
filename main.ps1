@@ -1,7 +1,7 @@
 $currentUser = ${env:Username}
-$inputXAML = Get-Content "C:\users\$currentUser\Development\wintool\main.xaml"
+#$inputXAML = Get-Content "C:\users\$currentUser\Development\wintool\main.xaml"
 #$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml") #uncomment for Testing
-#$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml") #uncomment for Production
+$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml") #uncomment for Production
 $inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
 [xml]$XAML = $inputXAML
@@ -73,7 +73,8 @@ $btnPowerShell.Add_Click({Start-Process powershell.exe})
 
 $btnSystemInfo.Add_Click({
     $currentUser = ${env:Username}
-    $sysInfoXAML = Get-Content "C:\users\$currentUser\Development\wintool\SystemInfoWindow.xaml"
+    #$sysInfoXAML = Get-Content "C:\users\$currentUser\Development\wintool\SystemInfoWindow.xaml"
+    $sysInfoXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/SystemInfoWindow.xaml") #uncomment for Production
     $sysInfoXAML = $sysInfoXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
     [xml]$sysXAML = $sysInfoXAML
     $sysReader = (New-Object System.Xml.XmlNodeReader $sysXAML)
