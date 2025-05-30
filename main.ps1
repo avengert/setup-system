@@ -464,7 +464,9 @@ $btnInstallLatestCU = $Form.FindName("btnInstallLatestCU")
 
 $btnInstallLatestCU.Add_Click({
     $currentUser = ${env:Username}
-    $wuXAML = Get-Content "C:\users\$currentUser\Development\wintool\WindowsUpdateWindow.xaml"
+    #$wuXAML = Get-Content "C:\users\$currentUser\Development\wintool\WindowsUpdateWindow.xaml"
+    $wuXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/WindowsUpdateWindow.xaml") #uncomment for Production
+    SystemInfoWindow
     $wuXAML = $wuXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
     [xml]$wuXML = $wuXAML
     $wuReader = (New-Object System.Xml.XmlNodeReader $wuXML)
