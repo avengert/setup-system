@@ -1,0 +1,192 @@
+{
+    "pups": [
+        {
+            "name": "McAfee Security",
+            "uninstallString": "MsiExec.exe /X{4B6C7001-C7D6-3710-913E-5BC23FCE91E6} /qn"
+        },
+        {
+            "name": "Norton Security",
+            "uninstallString": "MsiExec.exe /X{0C55C096-0F1D-4F28-AAA2-85EF591126E7} /qn"
+        },
+        {
+            "name": "AVG Antivirus",
+            "uninstallString": "MsiExec.exe /X{8E34682C-8118-31E1-BC4C-98B2B89C9B97} /qn"
+        },
+        {
+            "name": "Avast Antivirus",
+            "uninstallString": "MsiExec.exe /X{1E9FC118-651D-4934-97BE-A53BE4C73E32} /qn"
+        },
+        {
+            "name": "Kaspersky",
+            "uninstallString": "MsiExec.exe /X{6F45DC1E-5383-4F0E-8C9C-DC1321A8B8C3} /qn"
+        },
+        {
+            "name": "Webroot",
+            "uninstallString": "MsiExec.exe /X{2D0F2D92-4F43-4F05-97A1-5B97C09CAD6B} /qn"
+        },
+        {
+            "name": "Bitdefender",
+            "uninstallString": "MsiExec.exe /X{1F1C2DFC-2D24-3E06-BCB8-725134ADF989} /qn"
+        },
+        {
+            "name": "Trend Micro",
+            "uninstallString": "MsiExec.exe /X{8A74E887-8F0F-4017-AF53-CBA42211AAA5} /qn"
+        },
+        {
+            "name": "Malwarebytes",
+            "uninstallString": "MsiExec.exe /X{35065F43-4BB2-439A-BFF7-0F1014F2E0CD} /qn"
+        },
+        {
+            "name": "IObit Uninstaller",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "Advanced SystemCare",
+            "uninstallString": "MsiExec.exe /X{45D8E6FD-0085-4DBC-BFD7-E59E65C41F37} /qn"
+        },
+        {
+            "name": "CCleaner",
+            "uninstallString": "MsiExec.exe /X{1D5E29AD-39A9-4D0A-A8F6-5F86FBFFBCB8} /qn"
+        },
+        {
+            "name": "Driver Booster",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "Driver Easy",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "DriverMax",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "DriverPack Solution",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "DriverReviver",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "DriverTalent",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "DriverToolkit",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "DriverUpdate",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "Wise Care 365",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "Glary Utilities",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "Advanced System Optimizer",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "System Mechanic",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Optimizer Pro",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Cleaner Pro",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Speed Up",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Health Advisor",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Cleaner",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Booster",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Optimizer",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Speed Maximizer",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Speed Up Pro",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Speed Maximizer Pro",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Cleaner Pro",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Booster Pro",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Optimizer Pro",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Speed Up Ultimate",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Speed Maximizer Ultimate",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Cleaner Ultimate",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Booster Ultimate",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Optimizer Ultimate",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Speed Up Premium",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Speed Maximizer Premium",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Cleaner Premium",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Booster Premium",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        },
+        {
+            "name": "PC Optimizer Premium",
+            "uninstallString": "MsiExec.exe /X{5F189DF5-2D05-472B-9091-84D9848AE48B} /qn"
+        }
+    ]
+} 
