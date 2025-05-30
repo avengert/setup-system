@@ -1,0 +1,19 @@
+<Window x:Class="WpfApp1.WindowsUpdateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Windows Update Installer" Height="350" Width="600">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Latest Cumulative Update Installer" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+        <TextBox x:Name="txtWUStatus" Grid.Row="1" Margin="0,0,0,10" Height="160" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" IsReadOnly="True"/>
+        <ProgressBar x:Name="pbWUProgress" Grid.Row="2" Height="22" Margin="0,0,0,10" Minimum="0" Maximum="100"/>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="btnOpenTempFolder" Content="Open Temp Folder" Margin="0,0,10,0" Width="130"/>
+            <Button x:Name="btnCloseWU" Content="Close" Width="80"/>
+        </StackPanel>
+    </Grid>
+</Window> 
