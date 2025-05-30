@@ -1,7 +1,7 @@
 $currentUser = ${env:Username}
-#$inputXAML = Get-Content "C:\users\$currentUser\Development\wintool\main.xaml"
+$inputXAML = Get-Content "C:\users\$currentUser\Development\wintool\main.xaml"
 #$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml") #uncomment for Testing
-$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml") #uncomment for Production
+#$inputXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml") #uncomment for Production
 $inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
 [xml]$XAML = $inputXAML
@@ -11,6 +11,7 @@ catch {
   Write-Host $_.Exception
 }
 $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
+Add-Type -AssemblyName System.Windows.Forms
 
 Function ReadConfigFile(){
     $confFile = "$env:temp\adminConfig.conf"
@@ -72,8 +73,7 @@ $btnPowerShell.Add_Click({Start-Process powershell.exe})
 
 $btnSystemInfo.Add_Click({
     $currentUser = ${env:Username}
-    $sysInfoXAML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/avengert/setup-system/main/SystemInfoWindow.xaml") #uncomment for Production
-    #$sysInfoXAML = Get-Content "C:\users\$currentUser\Development\wintool\SystemInfoWindow.xaml"
+    $sysInfoXAML = Get-Content "C:\users\$currentUser\Development\wintool\SystemInfoWindow.xaml"
     $sysInfoXAML = $sysInfoXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
     [xml]$sysXAML = $sysInfoXAML
     $sysReader = (New-Object System.Xml.XmlNodeReader $sysXAML)
@@ -374,5 +374,288 @@ $btnRenewDHCP.Add_Click({
 $btnFlushDNS.Add_Click({
     $result = ipconfig /flushdns
     Show-NetworkOutput ($result -join "`r`n")
+})
+$lstInstalledApps = $Form.FindName("lstInstalledApps")
+$txtAppSearch = $Form.FindName("txtAppSearch")
+$btnChangeApp = $Form.FindName("btnChangeApp")
+$btnUninstallApp = $Form.FindName("btnUninstallApp")
+
+# Store app info in a hashtable for quick lookup
+$global:AppInventory = @()
+
+function Refresh-AppInventory {
+    $lstInstalledApps.Items.Clear()
+    $global:AppInventory = @()
+    $regPaths = @(
+        'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )
+    foreach ($path in $regPaths) {
+        Get-ItemProperty $path -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($_.DisplayName) {
+                $global:AppInventory += [PSCustomObject]@{
+                    Name = $_.DisplayName
+                    UninstallString = $_.UninstallString
+                    QuietUninstallString = $_.QuietUninstallString
+                    ModifyPath = $_.ModifyPath
+                }
+            }
+        }
+    }
+    $global:AppInventory = $global:AppInventory | Sort-Object Name -Unique
+    foreach ($app in $global:AppInventory) {
+        $lstInstalledApps.Items.Add($app.Name)
+    }
+}
+
+# Filter the list as you type
+$txtAppSearch.Add_TextChanged({
+    $lstInstalledApps.Items.Clear()
+    $search = $txtAppSearch.Text.ToLower()
+    foreach ($app in $global:AppInventory) {
+        if ($app.Name.ToLower() -like "*$search*") {
+            $lstInstalledApps.Items.Add($app.Name)
+        }
+    }
+})
+
+# Change button
+$btnChangeApp.Add_Click({
+    $selected = $lstInstalledApps.SelectedItem
+    if (-not $selected) {
+        [System.Windows.MessageBox]::Show("Please select an application to change.", "No App Selected", "OK", "Warning")
+        return
+    }
+    $app = $global:AppInventory | Where-Object { $_.Name -eq $selected }
+    if ($app.ModifyPath) {
+        Start-Process cmd.exe -ArgumentList "/c", $app.ModifyPath
+    } elseif ($app.UninstallString) {
+        Start-Process cmd.exe -ArgumentList "/c", $app.UninstallString
+    } else {
+        [System.Windows.MessageBox]::Show("No change/modify command found for this application.", "Not Available", "OK", "Warning")
+    }
+})
+
+# Uninstall button
+$btnUninstallApp.Add_Click({
+    $selected = $lstInstalledApps.SelectedItem
+    if (-not $selected) {
+        [System.Windows.MessageBox]::Show("Please select an application to uninstall.", "No App Selected", "OK", "Warning")
+        return
+    }
+    $app = $global:AppInventory | Where-Object { $_.Name -eq $selected }
+    $confirm = [System.Windows.MessageBox]::Show("Are you sure you want to uninstall '$($app.Name)'?", "Confirm Uninstall", "YesNo", "Warning")
+    if ($confirm -ne "Yes") { return }
+    if ($app.QuietUninstallString) {
+        Start-Process cmd.exe -ArgumentList "/c", $app.QuietUninstallString
+    } elseif ($app.UninstallString) {
+        Start-Process cmd.exe -ArgumentList "/c", $app.UninstallString
+    } else {
+        [System.Windows.MessageBox]::Show("No uninstall command found for this application.", "Not Available", "OK", "Warning")
+    }
+})
+
+# Populate on startup
+Refresh-AppInventory
+
+$btnInstallLatestCU = $Form.FindName("btnInstallLatestCU")
+
+$btnInstallLatestCU.Add_Click({
+    $currentUser = ${env:Username}
+    $wuXAML = Get-Content "C:\users\$currentUser\Development\wintool\WindowsUpdateWindow.xaml"
+    $wuXAML = $wuXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
+    [xml]$wuXML = $wuXAML
+    $wuReader = (New-Object System.Xml.XmlNodeReader $wuXML)
+    try { $WUForm = [Windows.Markup.XamlReader]::Load($wuReader) }
+    catch { Write-Host $_.Exception }
+    $txtWUStatus = $WUForm.FindName("txtWUStatus")
+    $pbWUProgress = $WUForm.FindName("pbWUProgress")
+    $btnOpenTempFolder = $WUForm.FindName("btnOpenTempFolder")
+    $btnCloseWU = $WUForm.FindName("btnCloseWU")
+
+    $tempFolder = "$env:TEMP\\WintoolUpdates"
+    if (-not (Test-Path $tempFolder)) { New-Item -ItemType Directory -Path $tempFolder | Out-Null }
+
+    function Update-Status($msg) {
+        $txtWUStatus.Dispatcher.Invoke([action]{ $txtWUStatus.AppendText("$msg`r`n"); $txtWUStatus.ScrollToEnd() })
+    }
+    function Set-Progress($val) {
+        $pbWUProgress.Dispatcher.Invoke([action]{ $pbWUProgress.Value = $val })
+    }
+
+    $btnOpenTempFolder.Add_Click({ Start-Process explorer.exe $tempFolder })
+    $btnCloseWU.Add_Click({ $WUForm.Close() })
+
+    # Async job to avoid freezing UI
+    Start-Job -ScriptBlock {
+        param($tempFolder)
+        function Get-WindowsVersion {
+            $os = Get-CimInstance Win32_OperatingSystem
+            return $os.Version
+        }
+        function Get-LatestCU {
+            $version = Get-WindowsVersion
+            $year = (Get-Date).Year
+            $month = (Get-Date).Month.ToString("00")
+            $search = "cumulative update $year-$month windows $version"
+            $url = "https://www.catalog.update.microsoft.com/Search.aspx?q=$($search -replace ' ', '+')"
+            $html = Invoke-WebRequest -Uri $url -UseBasicParsing
+            $matches = [regex]::Matches($html.Content, 'downloadInformation\"\s*,\s*\[\s*\{\s*\"size\":.*?\"url\":\"(http.*?\.msu)\"')
+            if ($matches.Count -gt 0) {
+                return $matches[0].Groups[1].Value
+            } else {
+                return $null
+            }
+        }
+        $msuUrl = Get-LatestCU
+        if (-not $msuUrl) {
+            return @{Status='No update found for this month.'}
+        }
+        $fileName = $msuUrl.Split('/')[-1]
+        $filePath = Join-Path $tempFolder $fileName
+        if (Test-Path $filePath) {
+            $status = 'Update already downloaded. Installing...'
+        } else {
+            $status = 'Downloading update...'
+            Invoke-WebRequest -Uri $msuUrl -OutFile $filePath
+        }
+        $status += "`r`nInstalling update..."
+        $install = Start-Process wusa.exe -ArgumentList "/quiet /norestart `"$filePath`"" -Wait -PassThru
+        return @{Status=$status; FilePath=$filePath; ExitCode=$install.ExitCode}
+    } -ArgumentList $tempFolder | Out-Null
+
+    # Poll for job completion
+    $timer = New-Object System.Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromSeconds(2)
+    $timer.Tag = $true
+    $timer.Add_Tick({
+        $jobs = Get-Job | Where-Object { $_.State -eq 'Completed' }
+        if ($jobs) {
+            $timer.Stop()
+            foreach ($job in $jobs) {
+                $result = Receive-Job $job
+                Remove-Job $job
+                if ($result.Status) { Update-Status $result.Status }
+                if ($result.FilePath) { Update-Status "File: $($result.FilePath)" }
+                if ($result.ExitCode -eq 0) {
+                    Update-Status "Update installed successfully."
+                } elseif ($result.ExitCode) {
+                    Update-Status "Installer exited with code $($result.ExitCode)."
+                }
+            }
+        } else {
+            Set-Progress ($pbWUProgress.Value + 10)
+        }
+    })
+    $timer.Start()
+    $WUForm.ShowDialog() | Out-Null
+})
+$lstScripts = $Form.FindName("lstScripts")
+$btnBrowseScripts = $Form.FindName("btnBrowseScripts")
+$txtScriptPreview = $Form.FindName("txtScriptPreview")
+$txtScriptArgs = $Form.FindName("txtScriptArgs")
+$chkRunAsAdmin = $Form.FindName("chkRunAsAdmin")
+$btnExecuteScript = $Form.FindName("btnExecuteScript")
+$btnClearOutput = $Form.FindName("btnClearOutput")
+$txtScriptOutput = $Form.FindName("txtScriptOutput")
+$btnSaveOutput = $Form.FindName("btnSaveOutput")
+
+# Store script file info
+$global:ScriptFiles = @()
+
+function Refresh-ScriptList {
+    $lstScripts.Items.Clear()
+    foreach ($file in $global:ScriptFiles) {
+        $lstScripts.Items.Add([System.IO.Path]::GetFileName($file))
+    }
+}
+
+# Drag-and-drop support
+$lstScripts.Add_Drop({
+    $files = $_.Data.GetData("FileDrop")
+    foreach ($file in $files) {
+        if ($file -match '\.(ps1|bat)$' -and -not ($global:ScriptFiles -contains $file)) {
+            $global:ScriptFiles += $file
+        }
+    }
+    Refresh-ScriptList
+})
+
+# Browse button
+$btnBrowseScripts.Add_Click({
+    $ofd = New-Object System.Windows.Forms.OpenFileDialog
+    $ofd.Filter = "Script Files (*.ps1;*.bat)|*.ps1;*.bat|All Files (*.*)|*.*"
+    $ofd.Multiselect = $true
+    if ($ofd.ShowDialog() -eq 'OK') {
+        foreach ($file in $ofd.FileNames) {
+            if (-not ($global:ScriptFiles -contains $file)) {
+                $global:ScriptFiles += $file
+            }
+        }
+        Refresh-ScriptList
+    }
+})
+
+# Show script preview on selection
+$lstScripts.Add_SelectionChanged({
+    $idx = $lstScripts.SelectedIndex
+    if ($idx -ge 0 -and $idx -lt $global:ScriptFiles.Count) {
+        $file = $global:ScriptFiles[$idx]
+        $txtScriptPreview.Text = Get-Content $file -Raw
+    } else {
+        $txtScriptPreview.Text = ""
+    }
+})
+
+# Execute script
+$btnExecuteScript.Add_Click({
+    $idx = $lstScripts.SelectedIndex
+    if ($idx -lt 0 -or $idx -ge $global:ScriptFiles.Count) {
+        [System.Windows.MessageBox]::Show("Please select a script to execute.", "No Script Selected", "OK", "Warning")
+        return
+    }
+    $file = $global:ScriptFiles[$idx]
+    $args = $txtScriptArgs.Text
+    $asAdmin = $chkRunAsAdmin.IsChecked
+    $txtScriptOutput.Text = "Running $file...`r`n"
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    if ($file -like "*.ps1") {
+        $psi.FileName = "powershell.exe"
+        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$file`" $args"
+    } elseif ($file -like "*.bat") {
+        $psi.FileName = $file
+        $psi.Arguments = $args
+    }
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+    if ($asAdmin) { $psi.Verb = "runas" }
+    $proc = New-Object System.Diagnostics.Process
+    $proc.StartInfo = $psi
+    $null = $proc.Start()
+    $output = ""
+    while (-not $proc.HasExited) {
+        $output += $proc.StandardOutput.ReadToEnd()
+        $output += $proc.StandardError.ReadToEnd()
+        $txtScriptOutput.Dispatcher.Invoke([action]{ $txtScriptOutput.Text = $output })
+        Start-Sleep -Milliseconds 200
+    }
+    $output += $proc.StandardOutput.ReadToEnd()
+    $output += $proc.StandardError.ReadToEnd()
+    $txtScriptOutput.Dispatcher.Invoke([action]{ $txtScriptOutput.Text = $output })
+})
+
+# Clear output
+$btnClearOutput.Add_Click({ $txtScriptOutput.Text = "" })
+
+# Save output
+$btnSaveOutput.Add_Click({
+    $sfd = New-Object System.Windows.Forms.SaveFileDialog
+    $sfd.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*"
+    if ($sfd.ShowDialog() -eq 'OK') {
+        Set-Content -Path $sfd.FileName -Value $txtScriptOutput.Text
+    }
 })
 $Form.ShowDialog()
