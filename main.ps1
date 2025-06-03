@@ -1,6 +1,6 @@
 # Command line parameters
 param(
-    [string]$Source,  # Can be "local", "beta", or "production"
+    [string]$Source = "production",  # Can be "local", "beta", or "production"
     [string]$LocalPath,  # Custom local path for XAML file
     [switch]$CheckVersion,  # Force version check
     [switch]$UpdateConfig,  # Update config file with new values
@@ -9,14 +9,31 @@ param(
     [switch]$ValidateOnly  # Only validate XAML without loading
 )
 
+# Load required assemblies
+try {
+    Add-Type -AssemblyName PresentationFramework
+    Add-Type -AssemblyName PresentationCore
+    Add-Type -AssemblyName WindowsBase
+    Add-Type -AssemblyName System.Xaml
+} catch {
+    Write-Error "Failed to load required assemblies. Please ensure .NET Framework is installed."
+    Write-Host "Press any key to exit..."
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit 1
+}
+
 $currentUser = ${env:Username}
+$scriptDir = $PSScriptRoot
+if (-not $scriptDir) {
+    $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+}
 
 # Configuration settings
 $configFile = "$env:TEMP\wintool_config.json"
 $versionFile = "$env:TEMP\wintool_version.json"
 $defaultConfig = @{
     "source" = "production"
-    "localPath" = "C:\users\$currentUser\Development\wintool\main.xaml"
+    "localPath" = Join-Path $scriptDir "main.xaml"
     "githubUrls" = @{
         "beta" = "https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml"
         "production" = "https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml"
@@ -31,17 +48,78 @@ $defaultConfig = @{
     "validateXAML" = $true
 }
 
+# Function to get file content from local or online source
+function Get-FileContent {
+    param(
+        [string]$path,
+        [string]$fallbackUrl
+    )
+    
+    try {
+        if ($path -and (Test-Path $path)) {
+            return Get-Content $path -Raw
+        } elseif ($fallbackUrl) {
+            $webClient = New-Object System.Net.WebClient
+            $webClient.Headers.Add("User-Agent", "PowerShell Wintool")
+            return $webClient.DownloadString($fallbackUrl)
+        }
+    } catch {
+        Write-Warning "Failed to load file from $path or $fallbackUrl : $_"
+    }
+    return $null
+}
+
 # Function to validate XAML content
 function Test-XAMLContent {
     param([string]$xamlContent)
     try {
-        [xml]$xaml = $xamlContent
-        $reader = New-Object System.Xml.XmlNodeReader $xaml
-        [Windows.Markup.XamlReader]::Load($reader) | Out-Null
+        if ([string]::IsNullOrWhiteSpace($xamlContent)) {
+            throw "XAML content is empty"
+        }
+        
+        # Create a new XAML reader settings
+        $readerSettings = New-Object System.Xml.XmlReaderSettings
+        $readerSettings.IgnoreWhitespace = $true
+        
+        # Create a string reader for the XAML content
+        $stringReader = New-Object System.IO.StringReader($xamlContent)
+        $xmlReader = [System.Xml.XmlReader]::Create($stringReader, $readerSettings)
+        
+        # Load the XAML
+        $xaml = [Windows.Markup.XamlReader]::Load($xmlReader)
         return $true
     } catch {
         Write-Error "XAML validation failed: $_"
         return $false
+    }
+}
+
+# Function to load XAML content
+function Load-XAMLContent {
+    param([string]$xamlContent)
+    try {
+        if ([string]::IsNullOrWhiteSpace($xamlContent)) {
+            throw "XAML content is empty"
+        }
+        
+        # Remove class references and fix XAML
+        $xamlContent = $xamlContent -replace 'x:Class="[^"]*"', ''
+        $xamlContent = $xamlContent -replace 'xmlns:local="[^"]*"', ''
+        $xamlContent = $xamlContent -replace 'mc:Ignorable="d"', ''
+        
+        # Create a new XAML reader settings
+        $readerSettings = New-Object System.Xml.XmlReaderSettings
+        $readerSettings.IgnoreWhitespace = $true
+        
+        # Create a string reader for the XAML content
+        $stringReader = New-Object System.IO.StringReader($xamlContent)
+        $xmlReader = [System.Xml.XmlReader]::Create($stringReader, $readerSettings)
+        
+        # Load the XAML
+        return [Windows.Markup.XamlReader]::Load($xmlReader)
+    } catch {
+        Write-Error "Failed to load XAML: $_"
+        return $null
     }
 }
 
@@ -92,6 +170,23 @@ function Test-XAMLUpdates {
 # Load or create config
 if (Test-Path $configFile) {
     $config = Get-Content $configFile | ConvertFrom-Json
+    # Convert PSCustomObject back to Hashtable
+    $config = @{
+        source = $config.source
+        localPath = $config.localPath
+        githubUrls = @{
+            beta = $config.githubUrls.beta
+            production = $config.githubUrls.production
+        }
+        lastCheck = $config.lastCheck
+        version = @{
+            local = $config.version.local
+            beta = $config.version.beta
+            production = $config.version.production
+        }
+        autoUpdate = $config.autoUpdate
+        validateXAML = $config.validateXAML
+    }
 } else {
     $config = $defaultConfig
     $config | ConvertTo-Json -Depth 10 | Set-Content $configFile
@@ -110,7 +205,7 @@ $shouldCheck = $CheckVersion -or
 
 if ($shouldCheck) {
     Write-Host "Checking for XAML updates..."
-    $updates = Test-XAMLUpdates $config
+    $updates = Test-XAMLUpdates -config ([hashtable]$config)
     
     # Update version information
     if ($updates.beta) {
@@ -133,62 +228,71 @@ if ($shouldCheck) {
 try {
     $inputXAML = switch ($config.source) {
         "local" { 
-            if (Test-Path $config.localPath) {
-                $content = Get-Content $config.localPath
+            $content = Get-FileContent -path $config.localPath -fallbackUrl $config.githubUrls.production
+            if ($content) {
                 $config.version.local = Get-FileVersion $content
                 $content
             } else {
-                Write-Warning "Local XAML file not found at $($config.localPath). Falling back to production."
-                $updates.production.content
+                throw "Failed to load XAML from local path or fallback URL"
             }
         }
         "beta" { 
-            if ($updates.beta) {
-                $updates.beta.content
+            $content = Get-FileContent -path $null -fallbackUrl $config.githubUrls.beta
+            if ($content) {
+                $content
             } else {
-                (new-object Net.WebClient).DownloadString($config.githubUrls.beta)
+                throw "Failed to load XAML from beta URL"
             }
         }
         "production" { 
-            if ($updates.production) {
-                $updates.production.content
+            $content = Get-FileContent -path $null -fallbackUrl $config.githubUrls.production
+            if ($content) {
+                $content
             } else {
-                (new-object Net.WebClient).DownloadString($config.githubUrls.production)
+                throw "Failed to load XAML from production URL"
             }
         }
         default { 
-            Write-Warning "Invalid source specified. Falling back to local file."
-            Get-Content $config.localPath
+            throw "Invalid source specified"
         }
     }
     
-    # Validate XAML if enabled
-    if ($config.validateXAML -and -not (Test-XAMLContent $inputXAML)) {
-        throw "XAML validation failed"
+    if ($ValidateOnly) {
+        Write-Host "XAML loaded successfully"
+        exit
     }
     
-    if ($ValidateOnly) {
-        Write-Host "XAML validation successful"
-        exit
+    # Load the XAML
+    $Form = Load-XAMLContent $inputXAML
+    if ($null -eq $Form) {
+        throw "Failed to load XAML form"
     }
     
 } catch {
     Write-Error "Failed to load XAML: $_"
-    Write-Warning "Falling back to local file."
-    $inputXAML = Get-Content $config.localPath
+    Write-Warning "Attempting to load from production URL as fallback..."
+    try {
+        $inputXAML = (new-object Net.WebClient).DownloadString($config.githubUrls.production)
+        $Form = Load-XAMLContent $inputXAML
+        if ($null -eq $Form) {
+            throw "Failed to load fallback XAML form"
+        }
+    } catch {
+        Write-Error "All attempts to load XAML failed. Please check your internet connection and try again."
+        exit 1
+    }
 }
 
 # Save the current configuration
 $config | ConvertTo-Json -Depth 10 | Set-Content $configFile
 
-# Continue with existing XAML processing
-$inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
-[void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
-[xml]$XAML = $inputXAML
-$reader = (New-Object System.Xml.XmlNodeReader $XAML)
-try { $Form = [Windows.Markup.XamlReader]::Load($reader) }
-catch { Write-Host $_.Exception }
-$XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
+# Find and assign UI elements
+try { 
+    # Find and assign UI elements
+    $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
+} catch { 
+    Write-Host "Warning: Some UI elements could not be found: $($_.Exception.Message)"
+}
 
 # Update version information label
 $currentVersion = switch ($config.source) {
@@ -343,37 +447,44 @@ $btnCmd.Add_Click({Start-Process cmd.exe})
 $btnPowerShell.Add_Click({Start-Process powershell.exe})
 
 $btnSystemInfo.Add_Click({
-    $currentUser = ${env:Username}
-    $sysInfoXAML = Get-Content "C:\users\$currentUser\Development\wintool\SystemInfoWindow.xaml"
-    $sysInfoXAML = $sysInfoXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
-    [xml]$sysXAML = $sysInfoXAML
-    $sysReader = (New-Object System.Xml.XmlNodeReader $sysXAML)
-    try { $SystemInfoForm = [Windows.Markup.XamlReader]::Load($sysReader) }
-    catch { Write-Host $_.Exception }
-    $txtSystemInfo = $SystemInfoForm.FindName("txtSystemInfo")
-    $btnCopyInfo = $SystemInfoForm.FindName("btnCopyInfo")
-    $btnCloseInfo = $SystemInfoForm.FindName("btnCloseInfo")
+    try {
+        $sysInfoXAML = Get-FileContent -path (Join-Path $scriptDir "SystemInfoWindow.xaml") -fallbackUrl "https://raw.githubusercontent.com/avengert/setup-system/main/SystemInfoWindow.xaml"
+        if (-not $sysInfoXAML) {
+            throw "Failed to load SystemInfoWindow.xaml"
+        }
+        
+        $sysInfoXAML = $sysInfoXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
+        [xml]$sysXAML = $sysInfoXAML
+        $sysReader = (New-Object System.Xml.XmlNodeReader $sysXAML)
+        try { $SystemInfoForm = [Windows.Markup.XamlReader]::Load($sysReader) }
+        catch { Write-Host $_.Exception }
+        $txtSystemInfo = $SystemInfoForm.FindName("txtSystemInfo")
+        $btnCopyInfo = $SystemInfoForm.FindName("btnCopyInfo")
+        $btnCloseInfo = $SystemInfoForm.FindName("btnCloseInfo")
 
-    # Gather system info
-    $info = @()
-    $info += "Computer Name: $env:COMPUTERNAME"
-    $info += "User Name: $env:USERNAME"
-    $info += "OS Version: $([System.Environment]::OSVersion.VersionString)"
-    $info += "64-bit OS: $([System.Environment]::Is64BitOperatingSystem)"
-    $info += "Processor: $((Get-WmiObject Win32_Processor).Name)"
-    $info += "RAM: $([math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)) GB"
-    $info += "System Drive Free Space: $([math]::Round((Get-WmiObject Win32_LogicalDisk -Filter \"DeviceID='C:'\").FreeSpace / 1GB, 2)) GB"
-    $info += "IP Addresses: $((Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '169.*' -and $_.IPAddress -ne '127.0.0.1' }).IPAddress -join ', ')"
-    $info += "Uptime: $((Get-CimInstance Win32_OperatingSystem).LastBootUpTime | %{(Get-Date) - $_} | %{[math]::Floor($_.TotalHours)}h $($_.Minutes)m)"
-    $txtSystemInfo.Text = $info -join "`r`n"
+        # Gather system info
+        $info = @()
+        $info += "Computer Name: $env:COMPUTERNAME"
+        $info += "User Name: $env:USERNAME"
+        $info += "OS Version: $([System.Environment]::OSVersion.VersionString)"
+        $info += "64-bit OS: $([System.Environment]::Is64BitOperatingSystem)"
+        $info += "Processor: $((Get-WmiObject Win32_Processor).Name)"
+        $info += "RAM: $([math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)) GB"
+        $info += "System Drive Free Space: $([math]::Round((Get-WmiObject Win32_LogicalDisk -Filter \"DeviceID='C:'\").FreeSpace / 1GB, 2)) GB"
+        $info += "IP Addresses: $((Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '169.*' -and $_.IPAddress -ne '127.0.0.1' }).IPAddress -join ', ')"
+        $info += "Uptime: $((Get-CimInstance Win32_OperatingSystem).LastBootUpTime | %{(Get-Date) - $_} | %{[math]::Floor($_.TotalHours)}h $($_.Minutes)m)"
+        $txtSystemInfo.Text = $info -join "`r`n"
 
-    $btnCopyInfo.Add_Click({
-        Set-Clipboard -Value $txtSystemInfo.Text
-    })
-    $btnCloseInfo.Add_Click({
-        $SystemInfoForm.Close()
-    })
-    $SystemInfoForm.ShowDialog() | Out-Null
+        $btnCopyInfo.Add_Click({
+            Set-Clipboard -Value $txtSystemInfo.Text
+        })
+        $btnCloseInfo.Add_Click({
+            $SystemInfoForm.Close()
+        })
+        $SystemInfoForm.ShowDialog() | Out-Null
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to load system info window: $_", "Error", "OK", "Error")
+    }
 })
 
 $btnClose.Add_Click({
@@ -704,7 +815,10 @@ Refresh-AppInventory
 
 $btnInstallLatestCU.Add_Click({
     $currentUser = ${env:Username}
-    $wuXAML = Get-Content "C:\users\$currentUser\Development\wintool\WindowsUpdateWindow.xaml"
+    $wuXAML = Get-FileContent -path (Join-Path $scriptDir "WindowsUpdateWindow.xaml") -fallbackUrl "https://raw.githubusercontent.com/avengert/setup-system/main/WindowsUpdateWindow.xaml"
+    if (-not $wuXAML) {
+        throw "Failed to load WindowsUpdateWindow.xaml"
+    }
     $wuXAML = $wuXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
     [xml]$wuXML = $wuXAML
     $wuReader = (New-Object System.Xml.XmlNodeReader $wuXML)
@@ -1312,6 +1426,7 @@ $lstSettingsCategories.Add_SelectionChanged({
     $remoteSettings.Visibility = if ($selected -eq "Remote Access") { "Visible" } else { "Collapsed" }
     $backupSettings.Visibility = if ($selected -eq "Backup Settings") { "Visible" } else { "Collapsed" }
     $securitySettings.Visibility = if ($selected -eq "Security Settings") { "Visible" } else { "Collapsed" }
+    $localInstallSettings.Visibility = if ($selected -eq "Local Install") { "Visible" } else { "Collapsed" }
 })
 
 # Add trusted computer
@@ -1340,5 +1455,45 @@ $btnSaveSettings.Add_Click({
 
 # Load settings on startup
 Load-Settings
+
+$btnInstallLocalAndCreateShortcut.Add_Click({
+    try {
+        # Create temp directory for the application
+        $tempAppDir = "$env:TEMP\Wintool"
+        if (-not (Test-Path $tempAppDir)) {
+            New-Item -ItemType Directory -Path $tempAppDir -Force | Out-Null
+        }
+
+        # Copy the main script and XAML files
+        $scriptDir = $PSScriptRoot
+        $scriptPath = Join-Path $scriptDir "wintool.ps1"
+        $xamlPath = Join-Path $scriptDir "main.xaml"
+        
+        Copy-Item -Path $scriptPath -Destination "$tempAppDir\wintool.ps1" -Force
+        Copy-Item -Path $xamlPath -Destination "$tempAppDir\main.xaml" -Force
+
+        # Create desktop shortcut
+        $WshShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\Wintool.lnk")
+        $Shortcut.TargetPath = "$tempAppDir\launch_wintool.vbs"
+        $Shortcut.WorkingDirectory = $tempAppDir
+        $Shortcut.Description = "Wintool System Management"
+        $Shortcut.Save()
+
+        [System.Windows.MessageBox]::Show(
+            "Local copy has been saved to:`n$tempAppDir`n`nA shortcut has been created on your desktop.",
+            "Success",
+            "OK",
+            "Information"
+        )
+    } catch {
+        [System.Windows.MessageBox]::Show(
+            "Failed to create local copy: $_",
+            "Error",
+            "OK",
+            "Error"
+        )
+    }
+})
 
 $Form.ShowDialog()
