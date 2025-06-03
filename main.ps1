@@ -1,22 +1,60 @@
 # Command line parameters
 param(
-    [string]$Source,  # Can be "local", "beta", or "production"
+    [string]$Source = "production",  # Can be "local", "beta", or "production"
     [string]$LocalPath,  # Custom local path for XAML file
     [switch]$CheckVersion,  # Force version check
     [switch]$UpdateConfig,  # Update config file with new values
     [string]$BetaUrl,  # Custom beta URL
     [string]$ProductionUrl,  # Custom production URL
-    [switch]$ValidateOnly  # Only validate XAML without loading
+    [switch]$ValidateOnly,  # Only validate XAML without loading
+    [switch]$NoWindow  # Hide PowerShell window
 )
 
+# Hide PowerShell window if requested
+if ($NoWindow) {
+    $code = @'
+    using System;
+    using System.Runtime.InteropServices;
+    public class Win32 {
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    }
+'@
+    Add-Type -TypeDefinition $code
+    $hwnd = (Get-Process -Id $pid).MainWindowHandle
+    [Win32]::ShowWindow($hwnd, 0) | Out-Null
+}
+
+# Load required assemblies
+try {
+    Add-Type -AssemblyName PresentationFramework
+    Add-Type -AssemblyName PresentationCore
+    Add-Type -AssemblyName WindowsBase
+    Add-Type -AssemblyName System.Xaml
+} catch {
+    Write-Error "Failed to load required assemblies. Please ensure .NET Framework is installed."
+    exit 1
+}
+
+# Set default window size
+$defaultWindowWidth = 1200
+$defaultWindowHeight = 800
+$defaultWindowLeft = [System.Windows.SystemParameters]::WorkArea.Width / 2 - $defaultWindowWidth / 2
+$defaultWindowTop = [System.Windows.SystemParameters]::WorkArea.Height / 2 - $defaultWindowHeight / 2
+
 $currentUser = ${env:Username}
+$scriptDir = $PSScriptRoot
+if (-not $scriptDir) {
+    $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+}
 
 # Configuration settings
 $configFile = "$env:TEMP\wintool_config.json"
 $versionFile = "$env:TEMP\wintool_version.json"
 $defaultConfig = @{
-    "source" = "local"
-    "localPath" = "C:\users\$currentUser\Development\wintool\main.xaml"
+    "source" = "production"
+    "localPath" = Join-Path $scriptDir "main.xaml"
     "githubUrls" = @{
         "beta" = "https://raw.githubusercontent.com/avengert/setup-system/beta/main.xaml"
         "production" = "https://raw.githubusercontent.com/avengert/setup-system/main/main.xaml"
@@ -31,17 +69,78 @@ $defaultConfig = @{
     "validateXAML" = $true
 }
 
+# Function to get file content from local or online source
+function Get-FileContent {
+    param(
+        [string]$path,
+        [string]$fallbackUrl
+    )
+    
+    try {
+        if ($path -and (Test-Path $path)) {
+            return Get-Content $path -Raw
+        } elseif ($fallbackUrl) {
+            $webClient = New-Object System.Net.WebClient
+            $webClient.Headers.Add("User-Agent", "PowerShell Wintool")
+            return $webClient.DownloadString($fallbackUrl)
+        }
+    } catch {
+        Write-Warning "Failed to load file from $path or $fallbackUrl : $_"
+    }
+    return $null
+}
+
 # Function to validate XAML content
 function Test-XAMLContent {
     param([string]$xamlContent)
     try {
-        [xml]$xaml = $xamlContent
-        $reader = New-Object System.Xml.XmlNodeReader $xaml
-        [Windows.Markup.XamlReader]::Load($reader) | Out-Null
+        if ([string]::IsNullOrWhiteSpace($xamlContent)) {
+            throw "XAML content is empty"
+        }
+        
+        # Create a new XAML reader settings
+        $readerSettings = New-Object System.Xml.XmlReaderSettings
+        $readerSettings.IgnoreWhitespace = $true
+        
+        # Create a string reader for the XAML content
+        $stringReader = New-Object System.IO.StringReader($xamlContent)
+        $xmlReader = [System.Xml.XmlReader]::Create($stringReader, $readerSettings)
+        
+        # Load the XAML
+        $xaml = [Windows.Markup.XamlReader]::Load($xmlReader)
         return $true
     } catch {
         Write-Error "XAML validation failed: $_"
         return $false
+    }
+}
+
+# Function to load XAML content
+function Load-XAMLContent {
+    param([string]$xamlContent)
+    try {
+        if ([string]::IsNullOrWhiteSpace($xamlContent)) {
+            throw "XAML content is empty"
+        }
+        
+        # Remove class references and fix XAML
+        $xamlContent = $xamlContent -replace 'x:Class="[^"]*"', ''
+        $xamlContent = $xamlContent -replace 'xmlns:local="[^"]*"', ''
+        $xamlContent = $xamlContent -replace 'mc:Ignorable="d"', ''
+        
+        # Create a new XAML reader settings
+        $readerSettings = New-Object System.Xml.XmlReaderSettings
+        $readerSettings.IgnoreWhitespace = $true
+        
+        # Create a string reader for the XAML content
+        $stringReader = New-Object System.IO.StringReader($xamlContent)
+        $xmlReader = [System.Xml.XmlReader]::Create($stringReader, $readerSettings)
+        
+        # Load the XAML
+        return [Windows.Markup.XamlReader]::Load($xmlReader)
+    } catch {
+        Write-Error "Failed to load XAML: $_"
+        return $null
     }
 }
 
@@ -92,6 +191,23 @@ function Test-XAMLUpdates {
 # Load or create config
 if (Test-Path $configFile) {
     $config = Get-Content $configFile | ConvertFrom-Json
+    # Convert PSCustomObject back to Hashtable
+    $config = @{
+        source = $config.source
+        localPath = $config.localPath
+        githubUrls = @{
+            beta = $config.githubUrls.beta
+            production = $config.githubUrls.production
+        }
+        lastCheck = $config.lastCheck
+        version = @{
+            local = $config.version.local
+            beta = $config.version.beta
+            production = $config.version.production
+        }
+        autoUpdate = $config.autoUpdate
+        validateXAML = $config.validateXAML
+    }
 } else {
     $config = $defaultConfig
     $config | ConvertTo-Json -Depth 10 | Set-Content $configFile
@@ -133,64 +249,77 @@ if ($shouldCheck) {
 try {
     $inputXAML = switch ($config.source) {
         "local" { 
-            if (Test-Path $config.localPath) {
-                $content = Get-Content $config.localPath
+            $content = Get-FileContent -path $config.localPath -fallbackUrl $config.githubUrls.production
+            if ($content) {
                 $config.version.local = Get-FileVersion $content
                 $content
             } else {
-                Write-Warning "Local XAML file not found at $($config.localPath). Falling back to production."
-                $updates.production.content
+                throw "Failed to load XAML from local path or fallback URL"
             }
         }
         "beta" { 
-            if ($updates.beta) {
-                $updates.beta.content
+            $content = Get-FileContent -path $null -fallbackUrl $config.githubUrls.beta
+            if ($content) {
+                $content
             } else {
-                (new-object Net.WebClient).DownloadString($config.githubUrls.beta)
+                throw "Failed to load XAML from beta URL"
             }
         }
         "production" { 
-            if ($updates.production) {
-                $updates.production.content
+            $content = Get-FileContent -path $null -fallbackUrl $config.githubUrls.production
+            if ($content) {
+                $content
             } else {
-                (new-object Net.WebClient).DownloadString($config.githubUrls.production)
+                throw "Failed to load XAML from production URL"
             }
         }
         default { 
-            Write-Warning "Invalid source specified. Falling back to local file."
-            Get-Content $config.localPath
+            throw "Invalid source specified"
         }
     }
     
-    # Validate XAML if enabled
-    if ($config.validateXAML -and -not (Test-XAMLContent $inputXAML)) {
-        throw "XAML validation failed"
+    if ($ValidateOnly) {
+        Write-Host "XAML loaded successfully"
+        exit
     }
     
-    if ($ValidateOnly) {
-        Write-Host "XAML validation successful"
-        exit
+    # Load the XAML
+    $Form = Load-XAMLContent $inputXAML
+    if ($null -eq $Form) {
+        throw "Failed to load XAML form"
     }
     
 } catch {
     Write-Error "Failed to load XAML: $_"
-    Write-Warning "Falling back to local file."
-    $inputXAML = Get-Content $config.localPath
+    Write-Warning "Attempting to load from production URL as fallback..."
+    try {
+        $inputXAML = (new-object Net.WebClient).DownloadString($config.githubUrls.production)
+        $Form = Load-XAMLContent $inputXAML
+        if ($null -eq $Form) {
+            throw "Failed to load fallback XAML form"
+        }
+    } catch {
+        Write-Error "All attempts to load XAML failed. Please check your internet connection and try again."
+        exit 1
+    }
 }
 
-# Save the current configuration
-$config | ConvertTo-Json -Depth 10 | Set-Content $configFile
+# After loading XAML and before showing the form
+$Form.Width = $defaultWindowWidth
+$Form.Height = $defaultWindowHeight
+$Form.Left = $defaultWindowLeft
+$Form.Top = $defaultWindowTop
 
-# Continue with existing XAML processing
-$inputXAML = $inputXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
-[void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
-[xml]$XAML = $inputXAML
-$reader = (New-Object System.Xml.XmlNodeReader $XAML)
+# Load settings on startup
+Load-Settings
+
+# Find and assign UI elements
 try { 
-    $Form = [Windows.Markup.XamlReader]::Load($reader)
     # Find and assign UI elements
     $XAML.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name $($_.Name) -Value $Form.FindName($_.Name)}
-} catch { Write-Host $_.Exception }
+} catch { 
+    Write-Host "Warning: Some UI elements could not be found: $($_.Exception.Message)"
+}
 
 # Update version information label
 $currentVersion = switch ($config.source) {
@@ -288,6 +417,50 @@ $lstPUPs = $Form.FindName("lstPUPs")
 $btnRemovePUPs = $Form.FindName("btnRemovePUPs")
 $btnRefreshPUPs = $Form.FindName("btnRefreshPUPs")
 
+# Settings UI elements
+$lstSettingsCategories = $Form.FindName("lstSettingsCategories")
+$generalSettings = $Form.FindName("generalSettings")
+$networkSettings = $Form.FindName("networkSettings")
+$remoteSettings = $Form.FindName("remoteSettings")
+$backupSettings = $Form.FindName("backupSettings")
+$securitySettings = $Form.FindName("securitySettings")
+$localInstallSettings = $Form.FindName("localInstallSettings")
+$chkAutoUpdate = $Form.FindName("chkAutoUpdate")
+$chkSaveWindowSize = $Form.FindName("chkSaveWindowSize")
+$chkStartMinimized = $Form.FindName("chkStartMinimized")
+$txtDefaultDNS = $Form.FindName("txtDefaultDNS")
+$txtDefaultUsername = $Form.FindName("txtDefaultUsername")
+$txtDefaultPassword = $Form.FindName("txtDefaultPassword")
+$txtDefaultGateway = $Form.FindName("txtDefaultGateway")
+$txtSubnetMask = $Form.FindName("txtSubnetMask")
+$txtPreferredDNS = $Form.FindName("txtPreferredDNS")
+$txtAlternateDNS = $Form.FindName("txtAlternateDNS")
+$txtRemotePort = $Form.FindName("txtRemotePort")
+$chkEnableRDP = $Form.FindName("chkEnableRDP")
+$chkAllowRemoteAssistance = $Form.FindName("chkAllowRemoteAssistance")
+$lstTrustedComputers = $Form.FindName("lstTrustedComputers")
+$txtNewTrustedComputer = $Form.FindName("txtNewTrustedComputer")
+$btnAddTrustedComputer = $Form.FindName("btnAddTrustedComputer")
+$txtBackupLocation = $Form.FindName("txtBackupLocation")
+$chkAutoBackup = $Form.FindName("chkAutoBackup")
+$cmbBackupSchedule = $Form.FindName("cmbBackupSchedule")
+$btnBrowseBackup = $Form.FindName("btnBrowseBackup")
+$chkEnableFirewall = $Form.FindName("chkEnableFirewall")
+$chkEnableDefender = $Form.FindName("chkEnableDefender")
+$chkAutoScan = $Form.FindName("chkAutoScan")
+$cmbScanSchedule = $Form.FindName("cmbScanSchedule")
+$btnSaveSettings = $Form.FindName("btnSaveSettings")
+$btnInstallLocalAndCreateShortcut = $Form.FindName("btnInstallLocalAndCreateShortcut")
+
+# Initialize settings UI
+$lstSettingsCategories.SelectedIndex = 0
+$generalSettings.Visibility = "Visible"
+$networkSettings.Visibility = "Collapsed"
+$remoteSettings.Visibility = "Collapsed"
+$backupSettings.Visibility = "Collapsed"
+$securitySettings.Visibility = "Collapsed"
+$localInstallSettings.Visibility = "Collapsed"
+
 $themeConfigFile = "$env:TEMP\wintool_theme.conf"
 
 # PUP list configuration
@@ -345,37 +518,44 @@ $btnCmd.Add_Click({Start-Process cmd.exe})
 $btnPowerShell.Add_Click({Start-Process powershell.exe})
 
 $btnSystemInfo.Add_Click({
-    $currentUser = ${env:Username}
-    $sysInfoXAML = Get-Content "C:\users\$currentUser\Development\wintool\SystemInfoWindow.xaml"
-    $sysInfoXAML = $sysInfoXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
-    [xml]$sysXAML = $sysInfoXAML
-    $sysReader = (New-Object System.Xml.XmlNodeReader $sysXAML)
-    try { $SystemInfoForm = [Windows.Markup.XamlReader]::Load($sysReader) }
-    catch { Write-Host $_.Exception }
-    $txtSystemInfo = $SystemInfoForm.FindName("txtSystemInfo")
-    $btnCopyInfo = $SystemInfoForm.FindName("btnCopyInfo")
-    $btnCloseInfo = $SystemInfoForm.FindName("btnCloseInfo")
+    try {
+        $sysInfoXAML = Get-FileContent -path (Join-Path $scriptDir "SystemInfoWindow.xaml") -fallbackUrl "https://raw.githubusercontent.com/avengert/setup-system/main/SystemInfoWindow.xaml"
+        if (-not $sysInfoXAML) {
+            throw "Failed to load SystemInfoWindow.xaml"
+        }
+        
+        $sysInfoXAML = $sysInfoXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
+        [xml]$sysXAML = $sysInfoXAML
+        $sysReader = (New-Object System.Xml.XmlNodeReader $sysXAML)
+        try { $SystemInfoForm = [Windows.Markup.XamlReader]::Load($sysReader) }
+        catch { Write-Host $_.Exception }
+        $txtSystemInfo = $SystemInfoForm.FindName("txtSystemInfo")
+        $btnCopyInfo = $SystemInfoForm.FindName("btnCopyInfo")
+        $btnCloseInfo = $SystemInfoForm.FindName("btnCloseInfo")
 
-    # Gather system info
-    $info = @()
-    $info += "Computer Name: $env:COMPUTERNAME"
-    $info += "User Name: $env:USERNAME"
-    $info += "OS Version: $([System.Environment]::OSVersion.VersionString)"
-    $info += "64-bit OS: $([System.Environment]::Is64BitOperatingSystem)"
-    $info += "Processor: $((Get-WmiObject Win32_Processor).Name)"
-    $info += "RAM: $([math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)) GB"
-    $info += "System Drive Free Space: $([math]::Round((Get-WmiObject Win32_LogicalDisk -Filter \"DeviceID='C:'\").FreeSpace / 1GB, 2)) GB"
-    $info += "IP Addresses: $((Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '169.*' -and $_.IPAddress -ne '127.0.0.1' }).IPAddress -join ', ')"
-    $info += "Uptime: $((Get-CimInstance Win32_OperatingSystem).LastBootUpTime | %{(Get-Date) - $_} | %{[math]::Floor($_.TotalHours)}h $($_.Minutes)m)"
-    $txtSystemInfo.Text = $info -join "`r`n"
+        # Gather system info
+        $info = @()
+        $info += "Computer Name: $env:COMPUTERNAME"
+        $info += "User Name: $env:USERNAME"
+        $info += "OS Version: $([System.Environment]::OSVersion.VersionString)"
+        $info += "64-bit OS: $([System.Environment]::Is64BitOperatingSystem)"
+        $info += "Processor: $((Get-WmiObject Win32_Processor).Name)"
+        $info += "RAM: $([math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)) GB"
+        $info += "System Drive Free Space: $([math]::Round((Get-WmiObject Win32_LogicalDisk -Filter \"DeviceID='C:'\").FreeSpace / 1GB, 2)) GB"
+        $info += "IP Addresses: $((Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '169.*' -and $_.IPAddress -ne '127.0.0.1' }).IPAddress -join ', ')"
+        $info += "Uptime: $((Get-CimInstance Win32_OperatingSystem).LastBootUpTime | %{(Get-Date) - $_} | %{[math]::Floor($_.TotalHours)}h $($_.Minutes)m)"
+        $txtSystemInfo.Text = $info -join "`r`n"
 
-    $btnCopyInfo.Add_Click({
-        Set-Clipboard -Value $txtSystemInfo.Text
-    })
-    $btnCloseInfo.Add_Click({
-        $SystemInfoForm.Close()
-    })
-    $SystemInfoForm.ShowDialog() | Out-Null
+        $btnCopyInfo.Add_Click({
+            Set-Clipboard -Value $txtSystemInfo.Text
+        })
+        $btnCloseInfo.Add_Click({
+            $SystemInfoForm.Close()
+        })
+        $SystemInfoForm.ShowDialog() | Out-Null
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to load system info window: $_", "Error", "OK", "Error")
+    }
 })
 
 $btnClose.Add_Click({
@@ -706,7 +886,10 @@ Refresh-AppInventory
 
 $btnInstallLatestCU.Add_Click({
     $currentUser = ${env:Username}
-    $wuXAML = Get-Content "C:\users\$currentUser\Development\wintool\WindowsUpdateWindow.xaml"
+    $wuXAML = Get-FileContent -path (Join-Path $scriptDir "WindowsUpdateWindow.xaml") -fallbackUrl "https://raw.githubusercontent.com/avengert/setup-system/main/WindowsUpdateWindow.xaml"
+    if (-not $wuXAML) {
+        throw "Failed to load WindowsUpdateWindow.xaml"
+    }
     $wuXAML = $wuXAML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
     [xml]$wuXML = $wuXAML
     $wuReader = (New-Object System.Xml.XmlNodeReader $wuXML)
@@ -1242,6 +1425,7 @@ function Save-Settings {
             DefaultDNS = $txtDefaultDNS.Text
             DefaultUsername = $txtDefaultUsername.Text
             DefaultPassword = $txtDefaultPassword.Password
+            SourceChannel = $cmbSourceChannel.SelectedItem.Content
         }
         Network = @{
             DefaultGateway = $txtDefaultGateway.Text
@@ -1266,6 +1450,13 @@ function Save-Settings {
             AutoScan = $chkAutoScan.IsChecked
             ScanSchedule = $cmbScanSchedule.SelectedItem.Content
         }
+        Window = @{
+            Width = $Form.ActualWidth
+            Height = $Form.ActualHeight
+            Left = $Form.Left
+            Top = $Form.Top
+            WindowState = $Form.WindowState
+        }
     }
     $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $settingsConfigFile
 }
@@ -1273,38 +1464,158 @@ function Save-Settings {
 # Function to load settings
 function Load-Settings {
     if (Test-Path $settingsConfigFile) {
-        $settings = Get-Content $settingsConfigFile | ConvertFrom-Json
-        # General Settings
-        $chkAutoUpdate.IsChecked = $settings.General.AutoUpdate
-        $chkSaveWindowSize.IsChecked = $settings.General.SaveWindowSize
-        $chkStartMinimized.IsChecked = $settings.General.StartMinimized
-        $txtDefaultDNS.Text = $settings.General.DefaultDNS
-        $txtDefaultUsername.Text = $settings.General.DefaultUsername
-        $txtDefaultPassword.Password = $settings.General.DefaultPassword
-        # Network Settings
-        $txtDefaultGateway.Text = $settings.Network.DefaultGateway
-        $txtSubnetMask.Text = $settings.Network.SubnetMask
-        $txtPreferredDNS.Text = $settings.Network.PreferredDNS
-        $txtAlternateDNS.Text = $settings.Network.AlternateDNS
-        # Remote Settings
-        $txtRemotePort.Text = $settings.Remote.RemotePort
-        $chkEnableRDP.IsChecked = $settings.Remote.EnableRDP
-        $chkAllowRemoteAssistance.IsChecked = $settings.Remote.AllowRemoteAssistance
-        $lstTrustedComputers.Items.Clear()
-        foreach ($computer in $settings.Remote.TrustedComputers) {
-            $lstTrustedComputers.Items.Add($computer)
+        try {
+            $settings = Get-Content $settingsConfigFile | ConvertFrom-Json
+            # General Settings
+            $chkAutoUpdate.IsChecked = $settings.General.AutoUpdate
+            $chkSaveWindowSize.IsChecked = $settings.General.SaveWindowSize
+            $chkStartMinimized.IsChecked = $settings.General.StartMinimized
+            $txtDefaultDNS.Text = $settings.General.DefaultDNS
+            $txtDefaultUsername.Text = $settings.General.DefaultUsername
+            $txtDefaultPassword.Password = $settings.General.DefaultPassword
+            $cmbSourceChannel.SelectedItem = $cmbSourceChannel.Items | Where-Object { $_.Content -eq $settings.General.SourceChannel }
+            
+            # Network Settings
+            $txtDefaultGateway.Text = $settings.Network.DefaultGateway
+            $txtSubnetMask.Text = $settings.Network.SubnetMask
+            $txtPreferredDNS.Text = $settings.Network.PreferredDNS
+            $txtAlternateDNS.Text = $settings.Network.AlternateDNS
+            
+            # Remote Settings
+            $txtRemotePort.Text = $settings.Remote.RemotePort
+            $chkEnableRDP.IsChecked = $settings.Remote.EnableRDP
+            $chkAllowRemoteAssistance.IsChecked = $settings.Remote.AllowRemoteAssistance
+            $lstTrustedComputers.Items.Clear()
+            foreach ($computer in $settings.Remote.TrustedComputers) {
+                $lstTrustedComputers.Items.Add($computer)
+            }
+            
+            # Backup Settings
+            $txtBackupLocation.Text = $settings.Backup.BackupLocation
+            $chkAutoBackup.IsChecked = $settings.Backup.AutoBackup
+            $cmbBackupSchedule.SelectedItem = $cmbBackupSchedule.Items | Where-Object { $_.Content -eq $settings.Backup.BackupSchedule }
+            
+            # Security Settings
+            $chkEnableFirewall.IsChecked = $settings.Security.EnableFirewall
+            $chkEnableDefender.IsChecked = $settings.Security.EnableDefender
+            $chkAutoScan.IsChecked = $settings.Security.AutoScan
+            $cmbScanSchedule.SelectedItem = $cmbScanSchedule.Items | Where-Object { $_.Content -eq $settings.Security.ScanSchedule }
+            
+            # Window Settings
+            if ($settings.Window -and $chkSaveWindowSize.IsChecked) {
+                # Set window size and position
+                $Form.Width = $settings.Window.Width
+                $Form.Height = $settings.Window.Height
+                $Form.Left = $settings.Window.Left
+                $Form.Top = $settings.Window.Top
+                
+                # Set window state
+                if ($settings.Window.WindowState) {
+                    $Form.WindowState = $settings.Window.WindowState
+                }
+            } else {
+                # Apply default window size if no saved settings or save window size is disabled
+                $Form.Width = $defaultWindowWidth
+                $Form.Height = $defaultWindowHeight
+                $Form.Left = $defaultWindowLeft
+                $Form.Top = $defaultWindowTop
+            }
+            
+            # Apply settings that need immediate effect
+            if ($chkStartMinimized.IsChecked) {
+                $Form.WindowState = "Minimized"
+            }
+            
+            # Apply source channel setting
+            if ($settings.General.SourceChannel) {
+                $config.source = $settings.General.SourceChannel
+                $config | ConvertTo-Json -Depth 10 | Set-Content $configFile
+            }
+            
+            return $true
+        } catch {
+            Write-Warning "Failed to load settings: $_"
+            # Apply default window size on error
+            $Form.Width = $defaultWindowWidth
+            $Form.Height = $defaultWindowHeight
+            $Form.Left = $defaultWindowLeft
+            $Form.Top = $defaultWindowTop
+            return $false
         }
-        # Backup Settings
-        $txtBackupLocation.Text = $settings.Backup.BackupLocation
-        $chkAutoBackup.IsChecked = $settings.Backup.AutoBackup
-        $cmbBackupSchedule.SelectedItem = $cmbBackupSchedule.Items | Where-Object { $_.Content -eq $settings.Backup.BackupSchedule }
-        # Security Settings
-        $chkEnableFirewall.IsChecked = $settings.Security.EnableFirewall
-        $chkEnableDefender.IsChecked = $settings.Security.EnableDefender
-        $chkAutoScan.IsChecked = $settings.Security.AutoScan
-        $cmbScanSchedule.SelectedItem = $cmbScanSchedule.Items | Where-Object { $_.Content -eq $settings.Security.ScanSchedule }
+    } else {
+        # Apply default window size if no settings file exists
+        $Form.Width = $defaultWindowWidth
+        $Form.Height = $defaultWindowHeight
+        $Form.Left = $defaultWindowLeft
+        $Form.Top = $defaultWindowTop
+        return $false
     }
 }
+
+# Add event handlers for settings changes
+$chkAutoUpdate.Add_Checked({ Save-Settings })
+$chkAutoUpdate.Add_Unchecked({ Save-Settings })
+$chkSaveWindowSize.Add_Checked({ Save-Settings })
+$chkSaveWindowSize.Add_Unchecked({ Save-Settings })
+$chkStartMinimized.Add_Checked({ Save-Settings })
+$chkStartMinimized.Add_Unchecked({ Save-Settings })
+$txtDefaultDNS.Add_TextChanged({ Save-Settings })
+$txtDefaultUsername.Add_TextChanged({ Save-Settings })
+$txtDefaultPassword.Add_PasswordChanged({ Save-Settings })
+$cmbSourceChannel.Add_SelectionChanged({ Save-Settings })
+
+$txtDefaultGateway.Add_TextChanged({ Save-Settings })
+$txtSubnetMask.Add_TextChanged({ Save-Settings })
+$txtPreferredDNS.Add_TextChanged({ Save-Settings })
+$txtAlternateDNS.Add_TextChanged({ Save-Settings })
+
+$txtRemotePort.Add_TextChanged({ Save-Settings })
+$chkEnableRDP.Add_Checked({ Save-Settings })
+$chkEnableRDP.Add_Unchecked({ Save-Settings })
+$chkAllowRemoteAssistance.Add_Checked({ Save-Settings })
+$chkAllowRemoteAssistance.Add_Unchecked({ Save-Settings })
+$btnAddTrustedComputer.Add_Click({ Save-Settings })
+
+$txtBackupLocation.Add_TextChanged({ Save-Settings })
+$chkAutoBackup.Add_Checked({ Save-Settings })
+$chkAutoBackup.Add_Unchecked({ Save-Settings })
+$cmbBackupSchedule.Add_SelectionChanged({ Save-Settings })
+
+$chkEnableFirewall.Add_Checked({ Save-Settings })
+$chkEnableFirewall.Add_Unchecked({ Save-Settings })
+$chkEnableDefender.Add_Checked({ Save-Settings })
+$chkEnableDefender.Add_Unchecked({ Save-Settings })
+$chkAutoScan.Add_Checked({ Save-Settings })
+$chkAutoScan.Add_Unchecked({ Save-Settings })
+$cmbScanSchedule.Add_SelectionChanged({ Save-Settings })
+
+# Save window position and size when closing
+$Form.Add_Closing({
+    if ($chkSaveWindowSize.IsChecked) {
+        Save-Settings
+    }
+})
+
+# Add window state change handler
+$Form.Add_StateChanged({
+    if ($chkSaveWindowSize.IsChecked) {
+        Save-Settings
+    }
+})
+
+# Add window size change handler
+$Form.Add_SizeChanged({
+    if ($chkSaveWindowSize.IsChecked) {
+        Save-Settings
+    }
+})
+
+# Add window position change handler
+$Form.Add_LocationChanged({
+    if ($chkSaveWindowSize.IsChecked) {
+        Save-Settings
+    }
+})
 
 # Settings navigation
 $lstSettingsCategories.Add_SelectionChanged({
@@ -1341,42 +1652,293 @@ $btnSaveSettings.Add_Click({
     [System.Windows.MessageBox]::Show("Settings saved successfully.", "Success", "OK", "Information")
 })
 
-# Load settings on startup
-Load-Settings
+# Enable/Disable RDP
+$chkEnableRDP.Add_Checked({
+    try {
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        [System.Windows.MessageBox]::Show("Remote Desktop has been enabled.", "Success", "OK", "Information")
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to enable Remote Desktop: $_", "Error", "OK", "Error")
+    }
+})
+
+$chkEnableRDP.Add_Unchecked({
+    try {
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 1
+        Disable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        [System.Windows.MessageBox]::Show("Remote Desktop has been disabled.", "Success", "OK", "Information")
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to disable Remote Desktop: $_", "Error", "OK", "Error")
+    }
+})
+
+# Enable/Disable Remote Assistance
+$chkAllowRemoteAssistance.Add_Checked({
+    try {
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Remote Assistance' -Name "fAllowToGetHelp" -Value 1
+        Enable-NetFirewallRule -DisplayGroup "Remote Assistance"
+        [System.Windows.MessageBox]::Show("Remote Assistance has been enabled.", "Success", "OK", "Information")
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to enable Remote Assistance: $_", "Error", "OK", "Error")
+    }
+})
+
+$chkAllowRemoteAssistance.Add_Unchecked({
+    try {
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Remote Assistance' -Name "fAllowToGetHelp" -Value 0
+        Disable-NetFirewallRule -DisplayGroup "Remote Assistance"
+        [System.Windows.MessageBox]::Show("Remote Assistance has been disabled.", "Success", "OK", "Information")
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to disable Remote Assistance: $_", "Error", "OK", "Error")
+    }
+})
+
+# Enable/Disable Windows Firewall
+$chkEnableFirewall.Add_Checked({
+    try {
+        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
+        [System.Windows.MessageBox]::Show("Windows Firewall has been enabled.", "Success", "OK", "Information")
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to enable Windows Firewall: $_", "Error", "OK", "Error")
+    }
+})
+
+$chkEnableFirewall.Add_Unchecked({
+    try {
+        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+        [System.Windows.MessageBox]::Show("Windows Firewall has been disabled.", "Success", "OK", "Information")
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to disable Windows Firewall: $_", "Error", "OK", "Error")
+    }
+})
+
+# Enable/Disable Windows Defender
+$chkEnableDefender.Add_Checked({
+    try {
+        Set-MpPreference -DisableRealtimeMonitoring $false
+        [System.Windows.MessageBox]::Show("Windows Defender has been enabled.", "Success", "OK", "Information")
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to enable Windows Defender: $_", "Error", "OK", "Error")
+    }
+})
+
+$chkEnableDefender.Add_Unchecked({
+    try {
+        Set-MpPreference -DisableRealtimeMonitoring $true
+        [System.Windows.MessageBox]::Show("Windows Defender has been disabled.", "Success", "OK", "Information")
+    } catch {
+        [System.Windows.MessageBox]::Show("Failed to disable Windows Defender: $_", "Error", "OK", "Error")
+    }
+})
 
 $btnInstallLocalAndCreateShortcut.Add_Click({
+    $tempAppDir = "$env:TEMP\Wintool"
+    $desktopShortcut = "$env:USERPROFILE\Desktop\Wintool.lnk"
+    
+    # Check if local copy exists
+    if (Test-Path $tempAppDir) {
+        # If exists, remove it
+        $confirm = [System.Windows.MessageBox]::Show(
+            "Are you sure you want to remove the local copy and desktop shortcut?",
+            "Confirm Removal",
+            "YesNo",
+            "Question"
+        )
+
+        if ($confirm -eq "Yes") {
+            # Remove desktop shortcut if it exists
+            if (Test-Path $desktopShortcut) {
+                Remove-Item $desktopShortcut -Force
+            }
+
+            # Create a cleanup script that will run after this process exits
+            $cleanupScript = @"
+# Wait for the main process to exit
+Start-Sleep -Seconds 3
+
+# Function to force remove directory
+function Remove-DirectoryForce {
+    param([string]`$path)
+    
+    if (Test-Path `$path) {
+        # Get all files and folders
+        Get-ChildItem -Path `$path -Recurse | ForEach-Object {
+            # Remove read-only attribute
+            if (`$_.Attributes -match 'ReadOnly') {
+                `$_.Attributes = `$_.Attributes -band (-bnot [System.IO.FileAttributes]::ReadOnly)
+            }
+        }
+        
+        # Try to remove the directory
+        try {
+            Remove-Item -Path `$path -Recurse -Force -ErrorAction Stop
+        } catch {
+            # If first attempt fails, try to remove files individually
+            Get-ChildItem -Path `$path -Recurse | ForEach-Object {
+                try {
+                    Remove-Item `$_.FullName -Force -ErrorAction Stop
+                } catch {
+                    # If file is locked, try to unlock it
+                    `$file = `$_.FullName
+                    `$handle = [System.IO.File]::Open(`$file, 'Open', 'ReadWrite', 'None')
+                    `$handle.Close()
+                    Remove-Item `$file -Force
+                }
+            }
+            # Try to remove the directory again
+            Remove-Item -Path `$path -Recurse -Force
+        }
+    }
+}
+
+# Remove the Wintool directory
+Remove-DirectoryForce -path "$tempAppDir"
+
+# Verify removal
+if (Test-Path "$tempAppDir") {
+    # If still exists, try one more time with a longer wait
+    Start-Sleep -Seconds 5
+    Remove-DirectoryForce -path "$tempAppDir"
+}
+
+# Clean up the cleanup scripts
+Remove-Item -Path "$env:TEMP\wintool_cleanup.ps1" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$env:TEMP\wintool_cleanup.vbs" -Force -ErrorAction SilentlyContinue
+"@
+            $cleanupScriptPath = "$env:TEMP\wintool_cleanup.ps1"
+            Set-Content -Path $cleanupScriptPath -Value $cleanupScript
+
+            # Create a VBS script to run the cleanup script
+            $vbsContent = @"
+Set objShell = CreateObject("WScript.Shell")
+objShell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$cleanupScriptPath""", 0, False
+"@
+            $vbsPath = "$env:TEMP\wintool_cleanup.vbs"
+            Set-Content -Path $vbsPath -Value $vbsContent
+
+            # Run the VBS script
+            Start-Process -FilePath "wscript.exe" -ArgumentList $vbsPath -WindowStyle Hidden
+
+            # Update button text
+            $btnInstallLocalAndCreateShortcut.Content = "Save Local Copy and Create Shortcut"
+
+            [System.Windows.MessageBox]::Show(
+                "Local copy and desktop shortcut will be removed. The application will now close.",
+                "Success",
+                "OK",
+                "Information"
+            )
+
+            # Close the application
+            $Form.Close()
+        }
+    } else {
+        # If doesn't exist, create it
+        try {
+            # Create temp directory for the application
+            if (-not (Test-Path $tempAppDir)) {
+                New-Item -ItemType Directory -Path $tempAppDir -Force | Out-Null
+            }
+
+            # Copy the main script and XAML files
+            $scriptDir = $PSScriptRoot
+            $scriptPath = Join-Path $scriptDir "wintool.ps1"
+            $xamlPath = Join-Path $scriptDir "main.xaml"
+            
+            Copy-Item -Path $scriptPath -Destination "$tempAppDir\wintool.ps1" -Force
+            Copy-Item -Path $xamlPath -Destination "$tempAppDir\main.xaml" -Force
+
+            # Create VBS launcher script
+            $vbsContent = @"
+Set objShell = CreateObject("WScript.Shell")
+strPath = objShell.ExpandEnvironmentStrings("%TEMP%") & "\Wintool\wintool.ps1"
+objShell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & strPath & """ -NoWindow", 0, False
+"@
+            $vbsPath = "$tempAppDir\launch_wintool.vbs"
+            Set-Content -Path $vbsPath -Value $vbsContent
+
+            # Create desktop shortcut
+            $WshShell = New-Object -ComObject WScript.Shell
+            $Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\Wintool.lnk")
+            $Shortcut.TargetPath = $vbsPath
+            $Shortcut.WorkingDirectory = $tempAppDir
+            $Shortcut.Description = "Wintool System Management"
+            $Shortcut.IconLocation = "powershell.exe,0"
+            $Shortcut.Save()
+
+            # Update button text
+            $btnInstallLocalAndCreateShortcut.Content = "Remove Local Copy"
+
+            [System.Windows.MessageBox]::Show(
+                "Local copy has been saved to:`n$tempAppDir`n`nA shortcut has been created on your desktop.",
+                "Success",
+                "OK",
+                "Information"
+            )
+        } catch {
+            [System.Windows.MessageBox]::Show(
+                "Failed to create local copy: $_",
+                "Error",
+                "OK",
+                "Error"
+            )
+        }
+    }
+})
+
+# Update button text on startup based on whether local copy exists
+$tempAppDir = "$env:TEMP\Wintool"
+if (Test-Path $tempAppDir) {
+    $btnInstallLocalAndCreateShortcut.Content = "Remove Local Copy"
+} else {
+    $btnInstallLocalAndCreateShortcut.Content = "Save Local Copy and Create Shortcut"
+}
+
+# Add Remove Local Copy button handler
+$btnRemoveLocalCopy.Add_Click({
     try {
-        # Create temp directory for the application
         $tempAppDir = "$env:TEMP\Wintool"
+        $desktopShortcut = "$env:USERPROFILE\Desktop\Wintool.lnk"
+        
+        # Check if local copy exists
         if (-not (Test-Path $tempAppDir)) {
-            New-Item -ItemType Directory -Path $tempAppDir -Force | Out-Null
+            [System.Windows.MessageBox]::Show(
+                "No local copy found in the temp directory.",
+                "Information",
+                "OK",
+                "Information"
+            )
+            return
         }
 
-        # Copy the main script and XAML files
-        $scriptDir = $PSScriptRoot
-        $scriptPath = Join-Path $scriptDir "wintool.ps1"
-        $xamlPath = Join-Path $scriptDir "main.xaml"
-        
-        Copy-Item -Path $scriptPath -Destination "$tempAppDir\wintool.ps1" -Force
-        Copy-Item -Path $xamlPath -Destination "$tempAppDir\main.xaml" -Force
-
-        # Create desktop shortcut
-        $WshShell = New-Object -ComObject WScript.Shell
-        $Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\Wintool.lnk")
-        $Shortcut.TargetPath = "$tempAppDir\launch_wintool.vbs"
-        $Shortcut.WorkingDirectory = $tempAppDir
-        $Shortcut.Description = "Wintool System Management"
-        $Shortcut.Save()
-
-        [System.Windows.MessageBox]::Show(
-            "Local copy has been saved to:`n$tempAppDir`n`nA shortcut has been created on your desktop.",
-            "Success",
-            "OK",
-            "Information"
+        # Confirm removal
+        $confirm = [System.Windows.MessageBox]::Show(
+            "Are you sure you want to remove the local copy and desktop shortcut?",
+            "Confirm Removal",
+            "YesNo",
+            "Question"
         )
+
+        if ($confirm -eq "Yes") {
+            # Remove desktop shortcut if it exists
+            if (Test-Path $desktopShortcut) {
+                Remove-Item $desktopShortcut -Force
+            }
+
+            # Remove temp directory and all contents
+            Remove-Item $tempAppDir -Recurse -Force
+
+            [System.Windows.MessageBox]::Show(
+                "Local copy and desktop shortcut have been removed successfully.",
+                "Success",
+                "OK",
+                "Information"
+            )
+        }
     } catch {
         [System.Windows.MessageBox]::Show(
-            "Failed to create local copy: $_",
+            "Failed to remove local copy: $_",
             "Error",
             "OK",
             "Error"
