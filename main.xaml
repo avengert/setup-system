@@ -1,9 +1,8 @@
-<Window x:Class="WpfApp1.MainWindow"
+<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
         Title="System-Setup" Height="430" Width="775">
     <Grid Margin="0,0,0,-6">
@@ -381,6 +380,7 @@
                             <ListBoxItem Content="Remote Access"/>
                             <ListBoxItem Content="Backup Settings"/>
                             <ListBoxItem Content="Security Settings"/>
+                            <ListBoxItem Content="Local Install"/>
                         </ListBox>
 
                         <!-- Settings Content -->
@@ -403,6 +403,16 @@
                                             <TextBox x:Name="txtDefaultUsername" Width="150" Margin="0,0,5,0"/>
                                             <PasswordBox x:Name="txtDefaultPassword" Width="150"/>
                                         </StackPanel>
+                                    </StackPanel>
+                                </GroupBox>
+                                <GroupBox Header="XAML Source" Margin="0,0,0,10">
+                                    <StackPanel Margin="10">
+                                        <Label Content="Select the source for the application's UI (XAML):"/>
+                                        <ComboBox x:Name="cmbSourceChannel" Margin="0,5,0,10">
+                                            <ComboBoxItem Content="local"/>
+                                            <ComboBoxItem Content="beta"/>
+                                            <ComboBoxItem Content="production"/>
+                                        </ComboBox>
                                     </StackPanel>
                                 </GroupBox>
                             </StackPanel>
@@ -474,6 +484,19 @@
                                             <ComboBoxItem Content="Weekly"/>
                                             <ComboBoxItem Content="Monthly"/>
                                         </ComboBox>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- Local Install Settings -->
+                            <StackPanel x:Name="localInstallSettings" Visibility="Collapsed">
+                                <GroupBox Header="Local Installation" Margin="0,0,0,10">
+                                    <StackPanel Margin="10">
+                                        <Button x:Name="btnInstallLocalAndCreateShortcut" 
+                                                Content="Save Local Copy and Create Shortcut" 
+                                                Width="250" 
+                                                HorizontalAlignment="Left"
+                                                Padding="20,10"/>
                                     </StackPanel>
                                 </GroupBox>
                             </StackPanel>
